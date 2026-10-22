@@ -38,7 +38,15 @@ io.on('connection', function(socket) {
     socket.join(code);
     socket.roomCode = code;
     const room = getRoom(code);
-    room.players[socket.id] = { id: socket.id, name: 'Player', x: 0, z: 0, yaw: 0 };
+    
+    // ★ 服务器记录玩家的 Admin 状态
+    room.players[socket.id] = { 
+      id: socket.id, 
+      name: 'Player', 
+      x: 0, z: 0, yaw: 0, 
+      isAdmin: !!data.isAdmin 
+    };
+    
     socket.emit('roomJoined', { code, players: room.players, monsterState: room.monsterState });
     socket.to(code).emit('playerJoined', room.players[socket.id]);
   });
@@ -70,7 +78,6 @@ io.on('connection', function(socket) {
     io.to(code).emit('monsterSynced', rooms[code].monsterState);
   });
 
-  // ★ 新增：互坑模式，转发打队友的事件
   socket.on('hitPlayer', function(targetId) {
     const code = socket.roomCode;
     if (!code) return;
