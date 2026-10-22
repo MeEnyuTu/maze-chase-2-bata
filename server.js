@@ -13,12 +13,27 @@ app.get('/', (req, res) => {
 });
 
 const rooms = {};
+
 function getRoom(code) {
   if (!rooms[code]) {
     rooms[code] = { code, players: {}, monsterState: { rageMultiplier: 1.0, stunTimer: 0 } };
   }
   return rooms[code];
 }
+
+// ★ 新增：实时广播房间列表给所有人
+function broadcastRoomList() {
+  const list = [];
+  for (let code in rooms) {
+    const pCount = Object.keys(rooms[code].players).length;
+    if (pCount > 0) {
+      // 如果是 EGG 房间，但当前玩家不是 Admin，可以选择隐藏，这里为了简单，直接显示
+      list.push({ code: code, count: pCount });
+    }
+  }
+  io.emit('roomListUpdate', list);
+}
+
 function leaveRoom(socket) {
   const code = socket.roomCode;
   if (!code) return;
@@ -28,10 +43,15 @@ function leaveRoom(socket) {
   if (!room) return;
   delete room.players[socket.id];
   socket.to(code).emit('playerLeft', socket.id);
+  
   if (Object.keys(room.players).length === 0) delete rooms[code];
+  broadcastRoomList(); // 有人离开，更新列表
 }
 
 io.on('connection', function(socket) {
+  // 刚连接时，发一次列表
+  broadcastRoomList();
+
   socket.on('joinRoom', function(data) {
     let code = String((data && data.code) || '').toUpperCase().trim() || 'PUBLIC';
     leaveRoom(socket);
@@ -39,7 +59,6 @@ io.on('connection', function(socket) {
     socket.roomCode = code;
     const room = getRoom(code);
     
-    // ★ 服务器记录玩家的 Admin 状态
     room.players[socket.id] = { 
       id: socket.id, 
       name: 'Player', 
@@ -49,6 +68,8 @@ io.on('connection', function(socket) {
     
     socket.emit('roomJoined', { code, players: room.players, monsterState: room.monsterState });
     socket.to(code).emit('playerJoined', room.players[socket.id]);
+    
+    broadcastRoomList(); // 有人加入，更新列表
   });
   
   socket.on('playerMove', function(data) {
@@ -84,7 +105,9 @@ io.on('connection', function(socket) {
     io.to(code).emit('playerStunned', { targetId: targetId });
   });
   
-  socket.on('disconnect', function() { leaveRoom(socket); });
+  socket.on('disconnect', function() { 
+    leaveRoom(socket); 
+  });
 });
 
 server.listen(3000, function() {
