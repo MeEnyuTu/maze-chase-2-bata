@@ -17,6 +17,7 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
 #nbCount{color:#ffe066;font-weight:bold}
 #ammoDisplay{color:#ffb060;font-weight:bold}
 #ammoDisplay.empty{color:#884444}
+#ammoDisplay.admin{color:#ffd700;text-shadow:0 0 10px #ffd700}
 #warning{position:absolute;bottom:92px;left:50%;transform:translateX(-50%);font-size:22px;font-weight:bold;color:#ff4d4d;text-shadow:0 0 14px rgba(255,40,40,.9);opacity:0;transition:opacity .25s;letter-spacing:3px}
 #prompt{position:absolute;bottom:46px;left:50%;transform:translateX(-50%);font-size:15px;color:#b7d8c0;opacity:.75;letter-spacing:1px;text-align:center}
 #toast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.8);font-size:30px;font-weight:bold;color:#ffe066;text-shadow:0 0 20px rgba(255,220,80,.8);opacity:0;transition:opacity .3s,transform .3s;letter-spacing:3px;pointer-events:none;text-align:center;white-space:nowrap}
@@ -45,8 +46,6 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
 #puzzleInput{display:inline-block;min-width:200px;padding:8px 24px;font-size:32px;font-weight:bold;color:#8fe07a;letter-spacing:6px;background:rgba(0,0,0,.5);border:2px solid #4a6a3a;border-radius:4px;margin-bottom:14px;min-height:52px;line-height:44px}
 #puzzleFeedback{font-size:16px;letter-spacing:3px;height:24px;margin-bottom:16px;font-weight:bold}
 #puzzleHint{font-size:12px;color:#5a6a5a;letter-spacing:2px}
-
-/* 管理员系统弹窗 */
 #adminModal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);z-index:55;opacity:0;pointer-events:none;transition:opacity .2s}
 #adminModal.open{opacity:1;pointer-events:auto}
 #adminBox{padding:36px 60px 30px;background:linear-gradient(180deg,#0a1a10,#000);border:3px solid #00ffcc;border-radius:6px;box-shadow:0 0 50px rgba(0,255,204,0.3);text-align:center;min-width:460px}
@@ -55,8 +54,47 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
 #adminInput{display:inline-block;min-width:200px;padding:8px 24px;font-size:24px;font-weight:bold;color:#00ffcc;letter-spacing:6px;background:rgba(0,255,204,0.1);border:2px solid #00ffcc;border-radius:4px;margin-bottom:14px;min-height:52px;line-height:44px;text-align:center}
 #adminFeedback{font-size:16px;letter-spacing:3px;height:24px;margin-bottom:16px;font-weight:bold}
 #adminHint{font-size:12px;color:#2a8a70;letter-spacing:2px}
-.btnAdmin{margin-top:20px;padding:10px 30px;background:#00ffcc;color:#000;border:none;border-radius:4px;font-weight:bold;cursor:pointer;font-size:16px;letter-spacing:2px}
-.btnAdmin:hover{background:#88ffdd}
+
+/* ★ 服务器大厅 UI */
+#serverLobby {
+  margin-top: 25px;
+  width: 480px;
+  background: rgba(0,0,0,0.6);
+  border: 2px solid #00ffcc;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 0 20px rgba(0,255,204,0.2);
+  max-height: 200px;
+  overflow-y: auto;
+}
+#serverLobby h3 {
+  color: #00ffcc;
+  font-size: 16px;
+  letter-spacing: 4px;
+  margin-bottom: 12px;
+  border-bottom: 1px dashed #2a8a70;
+  padding-bottom: 8px;
+  text-align: left;
+}
+.lobby-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 8px;
+  background: rgba(0,255,204,0.05);
+  border: 1px solid #2a8a70;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+.lobby-item:hover { background: rgba(0,255,204,0.15); border-color: #00ffcc; }
+.lobby-code { font-size: 18px; font-weight: bold; color: #fff; letter-spacing: 2px; }
+.lobby-count { font-size: 14px; color: #8fe07a; margin-left: 15px; }
+.lobby-join-btn {
+  background: #00ffcc; color: #000; border: none; padding: 6px 15px;
+  font-weight: bold; font-family: inherit; cursor: pointer; border-radius: 3px; letter-spacing: 1px;
+}
+.lobby-join-btn:hover { background: #fff; }
 
 .screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:30;background:radial-gradient(circle at 50% 40%,rgba(20,50,35,.4),rgba(0,0,0,.93) 75%),#050a06;text-align:center;padding:20px}
 .screen.hidden{display:none}
@@ -89,6 +127,7 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
   <div id="topBar">
     <span>📓 <span id="hudNotebooks">Notebooks</span> <span id="nbCount">0</span> / 7</span>
     <span id="ammoDisplay">🔫 0 <span id="hudShots">shots</span></span>
+    <span id="adminBadge" style="display:none;color:#ffd700;font-weight:bold;text-shadow:0 0 10px #ffd700">👑 ADMIN</span>
   </div>
   <div id="batteryContainer"><div id="batteryBar"></div></div>
   <div id="netStatus">⚪ Single Player</div>
@@ -116,8 +155,6 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
     <div id="puzzleHint">Numbers · Enter to submit · ESC to cancel</div>
   </div>
 </div>
-
-<!-- ★ 管理员密码弹窗 -->
 <div id="adminModal">
   <div id="adminBox">
     <div id="adminTitle">SYSTEM ACCESS</div>
@@ -127,7 +164,6 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
     <div id="adminHint">Enter password · ESC to cancel</div>
   </div>
 </div>
-
 <div id="startScreen" class="screen">
   <h1>MAZE CHASE</h1>
   <h2 id="startSubtitle">MAZE CHASE</h2>
@@ -139,11 +175,7 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
   <p style="margin-top:14px" id="introText4">
     Collect all <strong style="color:#ffe066">7 notebooks</strong>, then escape.
   </p>
-  <p style="margin-top:8px" id="introText5">
-    <span class="key">M</span> <span id="keyMapLabel">Open map</span> ·
-    <span class="key">E</span> <span id="keySafeLabel">Open safe</span><br>
-    <span style="color:#ffb060" id="gunHintText">The safe contains shotgun shells. Left-click to stun it for 30 seconds.</span>
-  </p>
+  
   <p style="margin-top:18px;font-size:14px;color:#7fc98f;letter-spacing:3px" id="diffLabel">— DIFFICULTY —</p>
   <div>
     <button class="diffBtn selected" data-diff="easy" id="btnEasy">EASY (1 monster)</button>
@@ -155,7 +187,14 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
     <button id="roomRandom">🎲 Random</button>
   </div>
   <div id="roomHint">Players with the same room code enter the same maze</div>
-  <button class="btn" id="startBtn">START</button>
+  
+  <!-- ★ 大厅列表 -->
+  <div id="serverLobby" style="display:none;">
+    <h3>🌐 SERVER LOBBY (点击加入)</h3>
+    <div id="lobbyList"></div>
+  </div>
+
+  <button class="btn" id="startBtn" style="margin-top:20px;">START</button>
 </div>
 <div id="pauseScreen" class="screen hidden">
   <h1 style="font-size:44px" id="pauseTitle">PAUSED</h1>
@@ -177,12 +216,8 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
 var I18N = {
   current: 'en',
   t: {
-    en: {
-      subtitle: 'MAZE CHASE', introText1: 'You wake up in an abandoned school.', introText2: 'The sound of a ruler tapping the walls echoes through the corridors.', introText3: 'Something is slowly approaching you.', introText4: 'Collect all <strong style="color:#ffe066">7 notebooks</strong>, then escape.', keyMapLabel: 'Open map', keySafeLabel: 'Open safe', gunHintText: 'The safe contains shotgun shells. Left-click to stun it for 30 seconds.', diffLabel: '— DIFFICULTY —', easyBtn: 'EASY (1 monster)', mediumBtn: 'MEDIUM (2 monsters)', roomLabel: '— ONLINE ROOM —', roomPlaceholder: 'ROOM CODE', roomRandom: '🎲 Random', roomHint: 'Players with the same room code enter the same maze', startBtn: 'START', hudNotebooks: 'Notebooks', hudShots: 'shots', hudOnline: 'Online', modeSingle: '⚪ Single Player', modeOnline: '🟢 Online', warning: "⚠ IT'S NEARBY ⚠", pressE: 'Press E to open safe', promptMove: 'Move', promptLook: 'Look', promptShoot: 'Shoot', promptMap: 'Map', promptSprint: 'Sprint', paused: 'PAUSED', pauseHint: 'Click to continue', winTitle: 'YOU ESCAPED', winSub: 'ESCAPED', loseTitle: 'YOU WERE CAUGHT', loseSub: 'The ruler has fallen', endStats1: 'Notebooks: ', endStats2: 'Time: ', endWinMsg: 'The footsteps behind you finally stopped.', endLoseMsg: 'It was waiting for you to make a mistake.', restartBtn: 'RESTART', safeTitle: 'SAFE', safeSub: 'ENTER CODE', safeHint: 'Numbers · Enter to submit · ESC to cancel', safeWrong: '✗ Wrong code', safeRight: '✓ Unlocked', safeGet: 'Got ', safeShells: ' shells', mapTitle: 'SCHOOL MAP', mapHint: 'Release M to close map', collectToast: 'Notebook +1', noAmmo: 'Out of ammo…', stunToast: 'Monster stunned for 30 seconds', rageToast: 'IT RAGED! ×', startToast: 'Collect 7 notebooks…', startToastSingle: 'Single Player · Collect 7 notebooks…'
-    },
-    zh: {
-      subtitle: '迷 宫 追 逐', introText1: '你在一所废弃的学校里醒来。', introText2: '走廊里回荡着尺子敲击墙壁的声音。', introText3: '有个东西正在慢慢地靠近你。', introText4: '收集全部 <strong style="color:#ffe066">7 本笔记本</strong>，然后逃出去。', keyMapLabel: '打开地图', keySafeLabel: '打开保险箱', gunHintText: '保险箱里有霰弹枪子弹，左键射击可以眩晕它 30 秒。', diffLabel: '— 选 择 难 度 —', easyBtn: '简 单 (1 怪)', mediumBtn: '中 等 (2 怪)', roomLabel: '— 联 机 房 间 —', roomPlaceholder: '房间代码', roomRandom: '🎲 随机', roomHint: '同一个房间代码的玩家会进入同一个迷宫', startBtn: '开 始', hudNotebooks: '笔记本', hudShots: '发', hudOnline: '在线', modeSingle: '⚪ 单机模式', modeOnline: '🟢 联机模式', warning: '⚠ 它 就 在 附 近 ⚠', pressE: '按 E 打开保险箱', promptMove: '移动', promptLook: '鼠标 转向', promptShoot: '左键 射击', promptMap: '地图', promptSprint: '冲刺', paused: '已 暂 停', pauseHint: '点击屏幕继续', winTitle: '你 逃 出 来 了', winSub: '逃 脱 成 功', loseTitle: '你 被 抓 住 了', loseSub: '尺 子 落 下 的 声 音', endStats1: '收集笔记本：', endStats2: '用时：', endWinMsg: '身后的脚步声，终于停下了。', endLoseMsg: '它一直在等你犯错。', restartBtn: '再 来 一 次', safeTitle: '保 险 箱', safeSub: '解 锁 密 码', safeHint: '输入数字 · 回车提交 · ESC 取消', safeWrong: '✗ 密码错误', safeRight: '✓ 解锁成功', safeGet: '获得 ', safeShells: ' 发霰弹', mapTitle: '校 园 平 面 图', mapHint: '松开 M 收起地图', collectToast: '笔记本 +1', noAmmo: '没有子弹了…', stunToast: '怪物被眩晕了 30 秒', rageToast: '它 发 怒 了 ！ ×', startToast: '收集 7 本笔记本…', startToastSingle: '单机模式 · 收集 7 本笔记本…'
-    }
+    en: { subtitle: 'MAZE CHASE', introText1: 'You wake up in an abandoned school.', introText2: 'The sound of a ruler tapping the walls echoes through the corridors.', introText3: 'Something is slowly approaching you.', introText4: 'Collect all <strong style="color:#ffe066">7 notebooks</strong>, then escape.', keyMapLabel: 'Open map', keySafeLabel: 'Open safe', gunHintText: 'The safe contains shotgun shells. Left-click to stun it for 30 seconds.', diffLabel: '— DIFFICULTY —', easyBtn: 'EASY (1 monster)', mediumBtn: 'MEDIUM (2 monsters)', roomLabel: '— ONLINE ROOM —', roomPlaceholder: 'ROOM CODE', roomRandom: '🎲 Random', roomHint: 'Players with the same room code enter the same maze', startBtn: 'START', hudNotebooks: 'Notebooks', hudShots: 'shots', hudOnline: 'Online', modeSingle: '⚪ Single Player', modeOnline: '🟢 Online', warning: "⚠ IT'S NEARBY ⚠", pressE: 'Press E to open safe', promptMove: 'Move', promptLook: 'Look', promptShoot: 'Shoot', promptMap: 'Map', promptSprint: 'Sprint', paused: 'PAUSED', pauseHint: 'Click to continue', winTitle: 'YOU ESCAPED', winSub: 'ESCAPED', loseTitle: 'YOU WERE CAUGHT', loseSub: 'The ruler has fallen', endStats1: 'Notebooks: ', endStats2: 'Time: ', endWinMsg: 'The footsteps behind you finally stopped.', endLoseMsg: 'It was waiting for you to make a mistake.', restartBtn: 'RESTART', safeTitle: 'SAFE', safeSub: 'ENTER CODE', safeHint: 'Numbers · Enter to submit · ESC to cancel', safeWrong: '✗ Wrong code', safeRight: '✓ Unlocked', safeGet: 'Got ', safeShells: ' shells', mapTitle: 'SCHOOL MAP', mapHint: 'Release M to close map', collectToast: 'Notebook +1', noAmmo: 'Out of ammo…', stunToast: 'Monster stunned for 30 seconds', rageToast: 'IT RAGED! ×', startToast: 'Collect 7 notebooks…', startToastSingle: 'Single Player · Collect 7 notebooks…' },
+    zh: { subtitle: '迷 宫 追 逐', introText1: '你在一所废弃的学校里醒来。', introText2: '走廊里回荡着尺子敲击墙壁的声音。', introText3: '有个东西正在慢慢地靠近你。', introText4: '收集全部 <strong style="color:#ffe066">7 本笔记本</strong>，然后逃出去。', keyMapLabel: '打开地图', keySafeLabel: '打开保险箱', gunHintText: '保险箱里有霰弹枪子弹，左键射击可以眩晕它 30 秒。', diffLabel: '— 选 择 难 度 —', easyBtn: '简 单 (1 怪)', mediumBtn: '中 等 (2 怪)', roomLabel: '— 联 机 房 间 —', roomPlaceholder: '房间代码', roomRandom: '🎲 随机', roomHint: '同一个房间代码的玩家会进入同一个迷宫', startBtn: '开 始', hudNotebooks: '笔记本', hudShots: '发', hudOnline: '在线', modeSingle: '⚪ 单机模式', modeOnline: '🟢 联机模式', warning: '⚠ 它 就 在 附 近 ⚠', pressE: '按 E 打开保险箱', promptMove: '移动', promptLook: '鼠标 转向', promptShoot: '左键 射击', promptMap: '地图', promptSprint: '冲刺', paused: '已 暂 停', pauseHint: '点击屏幕继续', winTitle: '你 逃 出 来 了', winSub: '逃 脱 成 功', loseTitle: '你 被 抓 住 了', loseSub: '尺 子 落 下 的 声 音', endStats1: '收集笔记本：', endStats2: '用时：', endWinMsg: '身后的脚步声，终于停下了。', endLoseMsg: '它一直在等你犯错。', restartBtn: '再 来 一 次', safeTitle: '保 险 箱', safeSub: '解 锁 密 码', safeHint: '输入数字 · 回车提交 · ESC 取消', safeWrong: '✗ 密码错误', safeRight: '✓ 解锁成功', safeGet: '获得 ', safeShells: ' 发霰弹', mapTitle: '校 园 平 面 图', mapHint: '松开 M 收起地图', collectToast: '笔记本 +1', noAmmo: '没有子弹了…', stunToast: '怪物被眩晕了 30 秒', rageToast: '它 发 怒 了 ！ ×', startToast: '收集 7 本笔记本…', startToastSingle: '单机模式 · 收集 7 本笔记本…' }
   }
 };
 
@@ -236,9 +271,8 @@ var Game = {
   difficulty: 'easy', online: false,
   battery: 100, isStunned: false, stunTimer: 0, playerCount: 1,
   isEasterEgg: false,
-  isAdmin: false,           // ★ 管理员状态
-  adminInput: '',           // ★ 管理员密码输入
-  currentAdmin: null        // ★ 当前靠近的控制台
+  isAdmin: false,           
+  adminInput: ''            
 };
 
 /* ============================================================
@@ -343,6 +377,8 @@ var socket = null; var otherPlayers = {};
 var netStatusEl = document.getElementById('netStatus');
 var roomInput = document.getElementById('roomInput'), roomRandom = document.getElementById('roomRandom');
 var roomDisplay = null;
+var serverLobby = document.getElementById('serverLobby');
+var lobbyList = document.getElementById('lobbyList');
 
 function updateNetStatusText(){
   if(!netStatusEl) return;
@@ -367,12 +403,20 @@ if(roomInput) roomInput.value = randomRoomCode();
 function addOtherPlayer(data){
   if(!data || !data.id || otherPlayers[data.id]) return;
   var group = new THREE.Group();
-  var bodyMat = new THREE.MeshLambertMaterial({ color: 0x3b82f6, emissive: 0x1a3a80, emissiveIntensity: 0.8 });
+  var isAdmin = !!data.isAdmin;
+  var bodyColor = isAdmin ? 0xffd700 : 0x3b82f6; 
+  var emissiveColor = isAdmin ? 0x885500 : 0x1a3a80;
+  
+  var bodyMat = new THREE.MeshLambertMaterial({ color: bodyColor, emissive: emissiveColor, emissiveIntensity: 0.8 });
   var body = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 1.4, 8), bodyMat); body.position.y = 0.7; group.add(body);
+  
   var headMat = new THREE.MeshLambertMaterial({ color: 0xffcc99, emissive: 0x553311, emissiveIntensity: 0.6 });
   var head = new THREE.Mesh(new THREE.SphereGeometry(0.32, 8, 8), headMat); head.position.y = 1.65; group.add(head);
-  var marker = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 4), new THREE.MeshBasicMaterial({ color: 0xffe066 }));
+  
+  var markerMat = new THREE.MeshBasicMaterial({ color: isAdmin ? 0xffaa00 : 0xffe066 });
+  var marker = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 4), markerMat);
   marker.position.y = 2.2; group.add(marker);
+  
   group.position.set(data.x || 0, 0, data.z || 0); scene.add(group);
   otherPlayers[data.id] = { mesh: group, targetPos: new THREE.Vector3(data.x || 0, 0, data.z || 0), targetYaw: data.yaw || 0 };
   Game.playerCount = Object.keys(otherPlayers).length + 1; updateNetStatusText();
@@ -382,6 +426,46 @@ function clearOtherPlayers(){ Object.keys(otherPlayers).forEach(function(id){ sc
 function setupSocketListeners(){
   socket.on('connect', function(){ setNetStatus(true); clearOtherPlayers(); });
   socket.on('disconnect', function(){ clearOtherPlayers(); });
+  
+  // ★ 接收服务器大厅列表
+  socket.on('roomListUpdate', function(list){
+    if (Game.state !== 'menu') return; // 只在主菜单显示
+    
+    // 如果是单机模式提示
+    if (!Game.online) return;
+
+    serverLobby.style.display = 'block';
+    lobbyList.innerHTML = '';
+    
+    if (list.length === 0) {
+      lobbyList.innerHTML = '<div style="color:#777;font-size:14px;text-align:center;">当前没有活跃房间，快去创建一个吧！</div>';
+      return;
+    }
+
+    list.forEach(function(room) {
+      var div = document.createElement('div');
+      div.className = 'lobby-item';
+      div.innerHTML = `
+        <div>
+          <span class="lobby-code">${room.code}</span>
+          <span class="lobby-count">👤 ${room.count} 人</span>
+        </div>
+        <button class="lobby-join-btn" data-code="${room.code}">加入</button>
+      `;
+      lobbyList.appendChild(div);
+    });
+
+    // 绑定一键加入按钮
+    var btns = lobbyList.querySelectorAll('.lobby-join-btn');
+    btns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var code = this.getAttribute('data-code');
+        roomInput.value = code; // 自动填入房间号
+        SoundFX.init(); SoundFX.resume(); requestLock(); startGame(); // 直接开始游戏
+      });
+    });
+  });
+
   socket.on('roomJoined', function(data){
     if(!data) return; clearOtherPlayers();
     var count = 0;
@@ -391,8 +475,10 @@ function setupSocketListeners(){
   socket.on('playerJoined', function(data){ addOtherPlayer(data); });
   socket.on('playerMoved', function(data){ if(!data || !otherPlayers[data.id]) return; otherPlayers[data.id].targetPos.set(data.x, 0, data.z); otherPlayers[data.id].targetYaw = data.yaw; });
   socket.on('playerLeft', function(id){ if(otherPlayers[id]){ scene.remove(otherPlayers[id].mesh); delete otherPlayers[id]; Game.playerCount = Object.keys(otherPlayers).length + 1; updateNetStatusText(); } });
+  
   socket.on('playerStunned', function(data){
     if(data.targetId === socket.id){
+      if (Game.isAdmin) { showToast("👑 管理员免疫了眩晕", 1.5); return; }
       Game.isStunned = true; Game.stunTimer = 3.0;
       document.getElementById('stunOverlay').style.opacity = '1';
       showToast("💥 你被队友打晕了！", 2.0); SoundFX.caught();
@@ -497,7 +583,6 @@ function spawnNotebooks(){
   notebooks.forEach(function(nb){ scene.remove(nb.mesh); }); notebooks.length = 0; if(!notebookTex) notebookTex = makeNotebookTexture();
   
   if (Game.isEasterEgg) {
-    // ★ 彩蛋房间里放主控台
     var c = { gx: Math.floor(MW/2), gz: Math.floor(MH/2) };
     var mesh = createAdminConsoleMesh();
     mesh.position.set(OFF_X + (c.gx+0.5)*CELL, 0, OFF_Z + (c.gz+0.5)*CELL);
@@ -554,17 +639,22 @@ function generateMathQuestion(){ var type = randInt(0,2), a,b,answer,text; if(ty
  *  DOM 与 UI
  * ============================================================ */
 var puzzleModal = document.getElementById('puzzleModal'); var puzzleEqEl = document.getElementById('puzzleEq'); var puzzleInputEl = document.getElementById('puzzleInput'); var puzzleFeedbackEl = document.getElementById('puzzleFeedback'); var interactPrompt = document.getElementById('interactPrompt'); var ammoDisplayEl = document.getElementById('ammoDisplay'); var startScreen = document.getElementById('startScreen'); var pauseScreen = document.getElementById('pauseScreen'); var endScreen = document.getElementById('endScreen'); var endTitle = document.getElementById('endTitle'); var endSubtitle = document.getElementById('endSubtitle'); var endStats = document.getElementById('endStats'); var startBtn = document.getElementById('startBtn'); var restartBtn = document.getElementById('restartBtn'); var btnEasy = document.getElementById('btnEasy'); var btnMedium = document.getElementById('btnMedium'); var nbCountEl = document.getElementById('nbCount'); var warningEl = document.getElementById('warning'); var toastEl = document.getElementById('toast'); var vignetteEl = document.getElementById('vignette'); var mapOverlay = document.getElementById('mapOverlay'); var mapCanvas = document.getElementById('mapCanvas'); var mapCtx = mapCanvas.getContext('2d');
-
-// Admin 弹窗
-var adminModal = document.getElementById('adminModal');
-var adminInputEl = document.getElementById('adminInput');
-var adminFeedbackEl = document.getElementById('adminFeedback');
+var adminModal = document.getElementById('adminModal'); var adminInputEl = document.getElementById('adminInput'); var adminFeedbackEl = document.getElementById('adminFeedback'); var adminBadge = document.getElementById('adminBadge');
 
 function hideAllScreens(){ startScreen.classList.add('hidden'); pauseScreen.classList.add('hidden'); endScreen.classList.add('hidden'); }
 function showScreen(name){ hideAllScreens(); if(name==='start') startScreen.classList.remove('hidden'); if(name==='pause') pauseScreen.classList.remove('hidden'); if(name==='end') endScreen.classList.remove('hidden'); }
 function showToast(text, dur){ toastEl.textContent = text; toastEl.classList.add('show'); Game.toastTimer = dur||2.0; }
 function updateToast(dt){ if(Game.toastTimer>0){ Game.toastTimer -= dt; if(Game.toastTimer<=0) toastEl.classList.remove('show'); } }
-function updateAmmoDisplay(){ ammoDisplayEl.textContent = '🔫 ' + (Game.isAdmin ? '∞' : Game.ammo) + ' ' + T('hudShots'); ammoDisplayEl.classList.toggle('empty', Game.ammo <= 0 && !Game.isAdmin); }
+function updateAmmoDisplay(){ 
+  if (Game.isAdmin) {
+    ammoDisplayEl.textContent = '🔫 ∞ ' + T('hudShots');
+    ammoDisplayEl.classList.add('admin');
+  } else {
+    ammoDisplayEl.textContent = '🔫 ' + Game.ammo + ' ' + T('hudShots');
+    ammoDisplayEl.classList.toggle('empty', Game.ammo <= 0);
+    ammoDisplayEl.classList.remove('admin');
+  }
+}
 [btnEasy, btnMedium].forEach(function(btn){ btn.addEventListener('click', function(){ [btnEasy, btnMedium].forEach(function(b){ b.classList.remove('selected'); }); btn.classList.add('selected'); Game.difficulty = btn.dataset.diff; }); });
 
 var MAP_SIZE = 520, MAP_PAD = 22; var explored = [];
@@ -602,16 +692,21 @@ function drawMap(){
     var pgx = clamp(pg.gx,0,MW-1), pgz = clamp(pg.gz,0,MH-1);
     var ocx = toPx(pgx) + cw*0.5, ocy = toPy(pgz) + ch*0.5;
     
+    var isAdmin = p.mesh.children[0].material.color.getHex() === 0xffd700;
+    var color = isAdmin ? '#ffd700' : '#3b82f6';
+    
     var pulseRadius = cw * 0.4 + Math.sin(time) * cw * 0.15;
     g.beginPath();
     g.arc(ocx, ocy, pulseRadius, 0, Math.PI * 2);
-    g.strokeStyle = 'rgba(59,130,246,0.6)';
+    g.strokeStyle = color;
+    g.globalAlpha = 0.6;
     g.lineWidth = 2;
     g.stroke();
+    g.globalAlpha = 1.0;
     
     g.beginPath();
     g.arc(ocx, ocy, cw * 0.4, 0, Math.PI * 2);
-    g.fillStyle = '#3b82f6';
+    g.fillStyle = color;
     g.fill();
     g.strokeStyle = '#ffffff';
     g.lineWidth = 2;
@@ -636,7 +731,6 @@ function drawMap(){
     g.beginPath(); g.arc(scx,scy,cw*0.3,0,Math.PI*2); g.fillStyle = 'rgba(232,178,32,.9)'; g.fill();
   });
 
-  // 画主控台
   if (Game.isEasterEgg) {
     var consoleCell = notebooks[0];
     if (consoleCell && !consoleCell.collected) {
@@ -649,10 +743,13 @@ function drawMap(){
   var ppg = worldToGrid(player.pos.x, player.pos.z), ppgx = clamp(ppg.gx,0,MW-1), ppgz = clamp(ppg.gz,0,MH-1);
   var pcx = toPx(ppgx) + cw*0.5, pcy = toPy(ppgz) + ch*0.5, mapAngle = Math.atan2(-Math.cos(player.yaw), -Math.sin(player.yaw)), fanR = cw*3.6;
   g.beginPath(); g.moveTo(pcx,pcy); g.arc(pcx,pcy,fanR,mapAngle-0.55,mapAngle+0.55); g.closePath();
-  var fanGrad = g.createRadialGradient(pcx,pcy,0,pcx,pcy,fanR); fanGrad.addColorStop(0,'rgba(86,176,255,.32)'); fanGrad.addColorStop(1,'rgba(86,176,255,0)');
+  var fanGrad = g.createRadialGradient(pcx,pcy,0,pcx,pcy,fanR); 
+  var pColor = Game.isAdmin ? '255,215,0' : '86,176,255';
+  fanGrad.addColorStop(0,'rgba('+pColor+',.32)'); fanGrad.addColorStop(1,'rgba('+pColor+',0)');
   g.fillStyle = fanGrad; g.fill(); g.save(); g.translate(pcx,pcy); g.rotate(mapAngle + Math.PI/2);
   g.beginPath(); g.moveTo(0,-cw*0.62); g.lineTo(-cw*0.44,cw*0.46); g.lineTo(0,cw*0.26); g.lineTo(cw*0.44,cw*0.46); g.closePath();
-  g.fillStyle = '#1e7fd6'; g.fill(); g.strokeStyle = 'rgba(240,250,255,.95)'; g.lineWidth = 1.6; g.stroke(); g.restore();
+  g.fillStyle = Game.isAdmin ? '#ffd700' : '#1e7fd6'; 
+  g.fill(); g.strokeStyle = 'rgba(240,250,255,.95)'; g.lineWidth = 1.6; g.stroke(); g.restore();
 }
 
 /* ============================================================
@@ -721,14 +818,13 @@ function hitMonster(m){
 function updateSafes(dt){ 
   Game.nearbySafe = null; 
   if (Game.isEasterEgg) {
-    // 在彩蛋房间里，判断是否靠近主控台
     if (notebooks.length > 0 && !notebooks[0].collected) {
        var dx = notebooks[0].mesh.position.x - player.pos.x;
        var dz = notebooks[0].mesh.position.z - player.pos.z;
        if (Math.hypot(dx, dz) < 3.5) {
          interactPrompt.textContent = "按 E 连接系统主控台";
          interactPrompt.style.opacity = '1';
-         Game.nearbySafe = { isConsole: true }; // 占位
+         Game.nearbySafe = { isConsole: true };
          return;
        }
     }
@@ -761,7 +857,6 @@ function submitPuzzleAnswer(){
   }
 }
 
-/* ★ Admin 逻辑 */
 function openAdminModal(){
   Game.adminInput = '';
   adminInputEl.textContent = '_';
@@ -779,15 +874,14 @@ function closeAdminModal(){
 function submitAdminPassword(){
   if (Game.adminInput === 'admin') {
     Game.isAdmin = true;
+    localStorage.setItem('mazeAdminMode', 'true'); 
     adminFeedbackEl.textContent = '✓ ACCESS GRANTED';
     adminFeedbackEl.style.color = '#00ffcc';
     SoundFX.adminSuccess();
-    showToast("👑 管理员权限已开启", 3.0);
+    showToast("👑 管理员权限已激活，去别的房间大闹一场吧！", 3.0);
     
-    // 改变视觉反馈
+    adminBadge.style.display = 'inline';
     flashlight.color.setHex(0x00ffcc);
-    flashlight.intensity = 5.0;
-    Game.ammo = 999;
     updateAmmoDisplay();
     
     setTimeout(() => {
@@ -795,7 +889,7 @@ function submitAdminPassword(){
       requestLock();
       if(pointerLocked) { Game.state = 'playing'; hideAllScreens(); }
       else { Game.state = 'paused'; showScreen('pause'); }
-    }, 1000);
+    }, 1500);
   } else {
     adminFeedbackEl.textContent = '✗ ACCESS DENIED';
     adminFeedbackEl.style.color = '#ff3333';
@@ -823,7 +917,7 @@ function updatePlayer(dt){
   var sprinting = (keys['ShiftLeft'] || keys['ShiftRight']) && !Game.mapOpen;
   var speed = sprinting ? CONFIG.PLAYER_SPRINT : CONFIG.PLAYER_SPEED; 
   
-  if (Game.isAdmin) speed *= 2.0; // 管理员双倍移速
+  if (Game.isAdmin) speed *= 2.0; 
   if(Game.mapOpen) speed *= 0.42;
   
   var forward=0, strafe=0;
@@ -857,7 +951,8 @@ function updateMonsters(dt){
     var speed = CONFIG.MONSTER_BASE_SPEED * m.rageMultiplier, movedDist = 0;
     if(m.path && m.pathIndex < m.path.length){ var target = m.path[m.pathIndex], dx = target.x - mp.x, dz = target.z - mp.z, dist = Math.hypot(dx, dz); if(dist < 0.34) m.pathIndex++; else { var step = Math.min(speed * dt, dist); mp.x += (dx/dist) * step; mp.z += (dz/dist) * step; movedDist += step; var targetYaw = Math.atan2(dx, dz); m.facing = lerpAngle(m.facing, targetYaw, Math.min(1, dt*6)); m.group.rotation.y = m.facing; } }
     var swing = Math.sin(Game.time*5) * 0.42; if(ud.legL) ud.legL.rotation.x = swing; if(ud.legR) ud.legR.rotation.x = -swing; m.group.position.y = Math.abs(Math.sin(Game.time*5)) * 0.055;
-    var distToPlayer = Math.hypot(mp.x - player.pos.x, mp.z - player.pos.z); if(distToPlayer < CONFIG.MONSTER_CATCH_DIST && !Game.isStunned) onPlayerCaught();
+    var distToPlayer = Math.hypot(mp.x - player.pos.x, mp.z - player.pos.z); 
+    if(distToPlayer < CONFIG.MONSTER_CATCH_DIST && !Game.isStunned && !Game.isAdmin) onPlayerCaught(); 
   });
 }
 function updateNotebooks(dt){ 
@@ -867,11 +962,7 @@ function updateNotebooks(dt){
     if (!Game.isEasterEgg) nb.mesh.position.y = 1.25 + Math.sin(Game.time*2 + i)*0.16; 
     
     if(Math.hypot(nb.mesh.position.x - player.pos.x, nb.mesh.position.z - player.pos.z) < CONFIG.NOTEBOOK_PICK_DIST) {
-      if (Game.isEasterEgg) {
-        // 不收集，只是玩家碰不到即可（由 updateSafes 处理 E 键）
-      } else {
-        collectNotebook(nb);
-      }
+      if (!Game.isEasterEgg) collectNotebook(nb);
     } 
   } 
 }
@@ -901,6 +992,7 @@ function updateEnvironment(dt){
     hemiLight.intensity = 0.3 * batteryFactor;
     var flicker = 1.0 + Math.sin(Game.time*17.3)*0.04 + Math.sin(Game.time*7.1)*0.03;
     flashlight.intensity = 3.0 * batteryFactor * flicker;
+    if (Game.isAdmin) flashlight.intensity = 5.0; 
   } else {
     ambientLight.intensity = 1.0; hemiLight.intensity = 0.7; flashlight.intensity = 0;
   }
@@ -908,7 +1000,16 @@ function updateEnvironment(dt){
 
 var clock = null;
 function startGame(){
-  Game.state = 'playing'; Game.time = 0; Game.notebooksFound = 0; Game.mapOpen = false; Game.ammo = 0; Game.battery = 100; Game.isStunned = false; Game.isAdmin = false;
+  Game.state = 'playing'; Game.time = 0; Game.notebooksFound = 0; Game.mapOpen = false; Game.ammo = 0; Game.battery = 100; Game.isStunned = false; 
+  
+  Game.isAdmin = localStorage.getItem('mazeAdminMode') === 'true';
+  if (Game.isAdmin) {
+    adminBadge.style.display = 'inline';
+    flashlight.color.setHex(0x00ffcc);
+  } else {
+    adminBadge.style.display = 'none';
+    flashlight.color.setHex(0xffe9b0);
+  }
   
   var rawInput = roomInput.value.trim().replace(/\s+/g, ''); 
   Game.isEasterEgg = (rawInput === '2026/10/22/11:26' || rawInput === '2026-10-22-11:26');
@@ -920,13 +1021,14 @@ function startGame(){
   updateAmmoDisplay(); 
   
   var emitCode = Game.isEasterEgg ? 'EGG' : (rawInput.toUpperCase() || 'PUBLIC');
-  safeEmit('joinRoom', { code: emitCode, name: 'Player' });
+  safeEmit('joinRoom', { code: emitCode, name: 'Player', isAdmin: Game.isAdmin });
   
   SoundFX.startDrone(); nbCountEl.textContent = '0'; if(!clock) clock = new THREE.Clock(); clock.getDelta();
   hideAllScreens(); 
+  serverLobby.style.display = 'none'; // 开始游戏后隐藏大厅
   
   if (Game.isEasterEgg) {
-    showToast("✨ 欢迎来到开发者安全屋 ✨", 3.0);
+    showToast(Game.isAdmin ? "👑 管理员已登录" : "✨ 欢迎来到开发者安全屋 ✨", 3.0);
   } else {
     showToast(Game.online ? T('startToast') : T('startToastSingle'), 2.4);
   }
