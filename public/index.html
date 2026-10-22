@@ -62,7 +62,7 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
 #endStats{margin-top:18px;font-size:18px;color:#b6d9bf;letter-spacing:2px;line-height:2}
 #scanlines{position:fixed;inset:0;pointer-events:none;z-index:60;background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0px,rgba(0,0,0,0) 2px,rgba(0,0,0,.13) 3px,rgba(0,0,0,.13) 4px);opacity:.5;mix-blend-mode:multiply}
 #roomBox{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:12px}
-#roomInput{width:180px;padding:10px 16px;font-size:20px;font-family:inherit;letter-spacing:6px;text-align:center;color:#8fe07a;background:rgba(0,0,0,.5);border:2px solid #4a6a3a;border-radius:5px;text-transform:uppercase}
+#roomInput{width:260px;padding:10px 16px;font-size:20px;font-family:inherit;letter-spacing:6px;text-align:center;color:#8fe07a;background:rgba(0,0,0,.5);border:2px solid #4a6a3a;border-radius:5px;text-transform:uppercase}
 #roomRandom{padding:10px 18px;font-size:14px;font-family:inherit;letter-spacing:2px;color:#d6f5c0;background:rgba(40,80,50,.4);border:2px solid #4d8a5c;border-radius:5px;cursor:pointer;font-weight:bold}
 #roomRandom:hover{background:rgba(60,120,70,.6)}
 #roomHint{margin-top:8px;font-size:12px;color:#5a7a5a;letter-spacing:2px}
@@ -126,7 +126,8 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
   </div>
   <p style="margin-top:18px;font-size:14px;color:#7fc98f;letter-spacing:3px" id="roomLabel">— ONLINE ROOM —</p>
   <div id="roomBox">
-    <input id="roomInput" maxlength="20" placeholder="ROOM CODE" value="">
+    <!-- 这里的 maxlength 改成了 30 -->
+    <input id="roomInput" maxlength="30" placeholder="ROOM CODE" value="">
     <button id="roomRandom">🎲 Random</button>
   </div>
   <div id="roomHint">Players with the same room code enter the same maze</div>
@@ -461,7 +462,6 @@ function spawnNotebooks(){
   notebooks.forEach(function(nb){ scene.remove(nb.mesh); }); notebooks.length = 0; if(!notebookTex) notebookTex = makeNotebookTexture();
   
   if (Game.isEasterEgg) {
-    // 彩蛋房间：在正中心放 1 个笔记本
     var c = { gx: Math.floor(MW/2), gz: Math.floor(MH/2) };
     var mesh = createNotebookMesh();
     mesh.position.set(OFF_X + (c.gx+0.5)*CELL, 1.25, OFF_Z + (c.gz+0.5)*CELL);
@@ -557,7 +557,6 @@ function drawMap(){
     g.strokeStyle = m.stunTimer > 0 ? 'rgba(80,50,0,.95)' : 'rgba(40,8,8,.95)'; g.lineWidth = 1.6; g.stroke();
   });
 
-  // 强化好友地图 UI
   var time = Date.now() * 0.005;
   Object.keys(otherPlayers).forEach(function(id){
     var p = otherPlayers[id]; var pp = p.mesh.position; var pg = worldToGrid(pp.x, pp.z);
@@ -733,12 +732,11 @@ function updateHUD(dt){ vignetteEl.style.boxShadow = 'inset 0 0 ' + (120 + Math.
 
 function updateEnvironment(dt){
   if (Game.isEasterEgg) {
-    // 彩蛋房间：全亮，无手电筒，无雾气
     ambientLight.intensity = 1.2;
     hemiLight.intensity = 1.0;
     flashlight.intensity = 0;
     scene.fog = null;
-    scene.background = new THREE.Color(0x87CEEB); // 天蓝色背景
+    scene.background = new THREE.Color(0x87CEEB); 
     return;
   }
 
@@ -762,9 +760,9 @@ var clock = null;
 function startGame(){
   Game.state = 'playing'; Game.time = 0; Game.notebooksFound = 0; Game.mapOpen = false; Game.ammo = 0; Game.battery = 100; Game.isStunned = false;
   
-  // 彩蛋检测
-  var rawInput = roomInput.value.trim();
-  Game.isEasterEgg = (rawInput === '2026/10/22/11:26');
+  // ★ 防呆彩蛋检测：去掉所有空格，兼容 - 和 /
+  var rawInput = roomInput.value.trim().replace(/\s+/g, ''); 
+  Game.isEasterEgg = (rawInput === '2026/10/22/11:26' || rawInput === '2026-10-22-11:26');
   
   puzzleModal.classList.remove('open'); mapOverlay.classList.remove('open'); toastEl.classList.remove('show'); document.getElementById('stunOverlay').style.opacity = '0';
   generateMaze(); buildMazeMeshes(); resetExplored(); spawnPlayer(); updateExplored(); spawnNotebooks(); spawnBatteries(); spawnSafes(); spawnMonsters();
@@ -772,8 +770,7 @@ function startGame(){
   
   updateAmmoDisplay(); 
   
-  // 发送给服务器的 code 处理
-  var emitCode = Game.isEasterEgg ? 'EGG' : (rawInput.toUpperCase().trim() || 'PUBLIC');
+  var emitCode = Game.isEasterEgg ? 'EGG' : (rawInput.toUpperCase() || 'PUBLIC');
   safeEmit('joinRoom', { code: emitCode, name: 'Player' });
   
   SoundFX.startDrone(); nbCountEl.textContent = '0'; if(!clock) clock = new THREE.Clock(); clock.getDelta();
