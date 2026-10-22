@@ -23,9 +23,8 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
 #toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
 #interactPrompt{position:absolute;bottom:140px;left:50%;transform:translateX(-50%);font-size:18px;color:#ffe066;text-shadow:0 0 12px rgba(255,220,80,.8);opacity:0;transition:opacity .2s;letter-spacing:3px;padding:8px 20px;background:rgba(8,16,10,.72);border:1px solid #8a6a2a;border-radius:4px}
 #vignette{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 180px rgba(180,0,0,0);transition:box-shadow .3s}
-#stunOverlay{position:absolute;inset:0;pointer-events:none;background:rgba(255,0,0,0.3);opacity:0;transition:opacity 0.2s;z-index:50;backdrop-filter:blur(5px);}
-#playerCount{position:absolute;top:18px;right:18px;padding:8px 16px;background:rgba(8,16,10,.72);border:2px solid #2c5c3a;border-radius:6px;font-size:14px;color:#9fd7ff;letter-spacing:1px}
-#netStatus{position:absolute;top:60px;right:18px;padding:6px 12px;background:rgba(8,16,10,.72);border:2px solid #555;border-radius:4px;font-size:12px;color:#888;letter-spacing:1px}
+#stunOverlay{position:absolute;inset:0;pointer-events:none;background:rgba(255,0,0,0.4);opacity:0;transition:opacity 0.2s;z-index:50;backdrop-filter:blur(8px);}
+#netStatus{position:absolute;top:18px;right:18px;padding:8px 16px;background:rgba(8,16,10,.72);border:2px solid #555;border-radius:6px;font-size:14px;color:#888;letter-spacing:1px;transition:all .3s}
 #netStatus.online{border-color:#4c8a3e;color:#8fe07a}
 #langBtn{position:absolute;top:18px;left:18px;padding:8px 16px;background:rgba(8,16,10,.72);border:2px solid #4d8a5c;border-radius:6px;font-size:14px;color:#d6f5c0;letter-spacing:1px;pointer-events:auto;cursor:pointer;font-family:inherit;font-weight:bold;z-index:15}
 #langBtn:hover{background:rgba(40,80,50,.9);color:#8fe07a}
@@ -78,10 +77,8 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
     <span>📓 <span id="hudNotebooks">Notebooks</span> <span id="nbCount">0</span> / 7</span>
     <span id="ammoDisplay">🔫 0 <span id="hudShots">shots</span></span>
   </div>
-  <div id="batteryContainer">
-    <div id="batteryBar"></div>
-  </div>
-  <div id="playerCount">🌐 <span id="hudOnline">Online</span>: 1</div>
+  <div id="batteryContainer"><div id="batteryBar"></div></div>
+  <!-- 将原来的两个状态合并为一个 -->
   <div id="netStatus">⚪ Single Player</div>
   <div id="warning">⚠ IT'S NEARBY ⚠</div>
   <div id="interactPrompt">Press E to open safe</div>
@@ -157,122 +154,15 @@ var I18N = {
   current: 'en',
   t: {
     en: {
-      subtitle: 'MAZE CHASE',
-      introText1: 'You wake up in an abandoned school.',
-      introText2: 'The sound of a ruler tapping the walls echoes through the corridors.',
-      introText3: 'Something is slowly approaching you.',
-      introText4: 'Collect all <strong style="color:#ffe066">7 notebooks</strong>, then escape.',
-      keyMapLabel: 'Open map',
-      keySafeLabel: 'Open safe',
-      gunHintText: 'The safe contains shotgun shells. Left-click to stun it for 30 seconds.',
-      diffLabel: '— DIFFICULTY —',
-      easyBtn: 'EASY (1 monster)',
-      mediumBtn: 'MEDIUM (2 monsters)',
-      roomLabel: '— ONLINE ROOM —',
-      roomPlaceholder: 'ROOM CODE',
-      roomRandom: '🎲 Random',
-      roomHint: 'Players with the same room code enter the same maze',
-      startBtn: 'START',
-      hudNotebooks: 'Notebooks',
-      hudShots: 'shots',
-      hudOnline: 'Online',
-      modeSingle: '⚪ Single Player',
-      modeOnline: '🟢 Online',
-      warning: "⚠ IT'S NEARBY ⚠",
-      pressE: 'Press E to open safe',
-      promptMove: 'Move',
-      promptLook: 'Look',
-      promptShoot: 'Shoot',
-      promptMap: 'Map',
-      promptSprint: 'Sprint',
-      paused: 'PAUSED',
-      pauseHint: 'Click to continue',
-      winTitle: 'YOU ESCAPED',
-      winSub: 'ESCAPED',
-      loseTitle: 'YOU WERE CAUGHT',
-      loseSub: 'The ruler has fallen',
-      endStats1: 'Notebooks: ',
-      endStats2: 'Time: ',
-      endWinMsg: 'The footsteps behind you finally stopped.',
-      endLoseMsg: 'It was waiting for you to make a mistake.',
-      restartBtn: 'RESTART',
-      safeTitle: 'SAFE',
-      safeSub: 'ENTER CODE',
-      safeHint: 'Numbers · Enter to submit · ESC to cancel',
-      safeWrong: '✗ Wrong code',
-      safeRight: '✓ Unlocked',
-      safeGet: 'Got ',
-      safeShells: ' shells',
-      mapTitle: 'SCHOOL MAP',
-      mapHint: 'Release M to close map',
-      collectToast: 'Notebook +1',
-      noAmmo: 'Out of ammo…',
-      stunToast: 'Monster stunned for 30 seconds',
-      rageToast: 'IT RAGED! ×',
-      startToast: 'Collect 7 notebooks…',
-      startToastSingle: 'Single Player · Collect 7 notebooks…'
+      subtitle: 'MAZE CHASE', introText1: 'You wake up in an abandoned school.', introText2: 'The sound of a ruler tapping the walls echoes through the corridors.', introText3: 'Something is slowly approaching you.', introText4: 'Collect all <strong style="color:#ffe066">7 notebooks</strong>, then escape.', keyMapLabel: 'Open map', keySafeLabel: 'Open safe', gunHintText: 'The safe contains shotgun shells. Left-click to stun it for 30 seconds.', diffLabel: '— DIFFICULTY —', easyBtn: 'EASY (1 monster)', mediumBtn: 'MEDIUM (2 monsters)', roomLabel: '— ONLINE ROOM —', roomPlaceholder: 'ROOM CODE', roomRandom: '🎲 Random', roomHint: 'Players with the same room code enter the same maze', startBtn: 'START', hudNotebooks: 'Notebooks', hudShots: 'shots', hudOnline: 'Online', modeSingle: '⚪ Single Player', modeOnline: '🟢 Online', warning: "⚠ IT'S NEARBY ⚠", pressE: 'Press E to open safe', promptMove: 'Move', promptLook: 'Look', promptShoot: 'Shoot', promptMap: 'Map', promptSprint: 'Sprint', paused: 'PAUSED', pauseHint: 'Click to continue', winTitle: 'YOU ESCAPED', winSub: 'ESCAPED', loseTitle: 'YOU WERE CAUGHT', loseSub: 'The ruler has fallen', endStats1: 'Notebooks: ', endStats2: 'Time: ', endWinMsg: 'The footsteps behind you finally stopped.', endLoseMsg: 'It was waiting for you to make a mistake.', restartBtn: 'RESTART', safeTitle: 'SAFE', safeSub: 'ENTER CODE', safeHint: 'Numbers · Enter to submit · ESC to cancel', safeWrong: '✗ Wrong code', safeRight: '✓ Unlocked', safeGet: 'Got ', safeShells: ' shells', mapTitle: 'SCHOOL MAP', mapHint: 'Release M to close map', collectToast: 'Notebook +1', noAmmo: 'Out of ammo…', stunToast: 'Monster stunned for 30 seconds', rageToast: 'IT RAGED! ×', startToast: 'Collect 7 notebooks…', startToastSingle: 'Single Player · Collect 7 notebooks…'
     },
     zh: {
-      subtitle: '迷 宫 追 逐',
-      introText1: '你在一所废弃的学校里醒来。',
-      introText2: '走廊里回荡着尺子敲击墙壁的声音。',
-      introText3: '有个东西正在慢慢地靠近你。',
-      introText4: '收集全部 <strong style="color:#ffe066">7 本笔记本</strong>，然后逃出去。',
-      keyMapLabel: '打开地图',
-      keySafeLabel: '打开保险箱',
-      gunHintText: '保险箱里有霰弹枪子弹，左键射击可以眩晕它 30 秒。',
-      diffLabel: '— 选 择 难 度 —',
-      easyBtn: '简 单 (1 怪)',
-      mediumBtn: '中 等 (2 怪)',
-      roomLabel: '— 联 机 房 间 —',
-      roomPlaceholder: '房间代码',
-      roomRandom: '🎲 随机',
-      roomHint: '同一个房间代码的玩家会进入同一个迷宫',
-      startBtn: '开 始',
-      hudNotebooks: '笔记本',
-      hudShots: '发',
-      hudOnline: '在线',
-      modeSingle: '⚪ 单机模式',
-      modeOnline: '🟢 联机模式',
-      warning: '⚠ 它 就 在 附 近 ⚠',
-      pressE: '按 E 打开保险箱',
-      promptMove: '移动',
-      promptLook: '鼠标 转向',
-      promptShoot: '左键 射击',
-      promptMap: '地图',
-      promptSprint: '冲刺',
-      paused: '已 暂 停',
-      pauseHint: '点击屏幕继续',
-      winTitle: '你 逃 出 来 了',
-      winSub: '逃 脱 成 功',
-      loseTitle: '你 被 抓 住 了',
-      loseSub: '尺 子 落 下 的 声 音',
-      endStats1: '收集笔记本：',
-      endStats2: '用时：',
-      endWinMsg: '身后的脚步声，终于停下了。',
-      endLoseMsg: '它一直在等你犯错。',
-      restartBtn: '再 来 一 次',
-      safeTitle: '保 险 箱',
-      safeSub: '解 锁 密 码',
-      safeHint: '输入数字 · 回车提交 · ESC 取消',
-      safeWrong: '✗ 密码错误',
-      safeRight: '✓ 解锁成功',
-      safeGet: '获得 ',
-      safeShells: ' 发霰弹',
-      mapTitle: '校 园 平 面 图',
-      mapHint: '松开 M 收起地图',
-      collectToast: '笔记本 +1',
-      noAmmo: '没有子弹了…',
-      stunToast: '怪物被眩晕了 30 秒',
-      rageToast: '它 发 怒 了 ！ ×',
-      startToast: '收集 7 本笔记本…',
-      startToastSingle: '单机模式 · 收集 7 本笔记本…'
+      subtitle: '迷 宫 追 逐', introText1: '你在一所废弃的学校里醒来。', introText2: '走廊里回荡着尺子敲击墙壁的声音。', introText3: '有个东西正在慢慢地靠近你。', introText4: '收集全部 <strong style="color:#ffe066">7 本笔记本</strong>，然后逃出去。', keyMapLabel: '打开地图', keySafeLabel: '打开保险箱', gunHintText: '保险箱里有霰弹枪子弹，左键射击可以眩晕它 30 秒。', diffLabel: '— 选 择 难 度 —', easyBtn: '简 单 (1 怪)', mediumBtn: '中 等 (2 怪)', roomLabel: '— 联 机 房 间 —', roomPlaceholder: '房间代码', roomRandom: '🎲 随机', roomHint: '同一个房间代码的玩家会进入同一个迷宫', startBtn: '开 始', hudNotebooks: '笔记本', hudShots: '发', hudOnline: '在线', modeSingle: '⚪ 单机模式', modeOnline: '🟢 联机模式', warning: '⚠ 它 就 在 附 近 ⚠', pressE: '按 E 打开保险箱', promptMove: '移动', promptLook: '鼠标 转向', promptShoot: '左键 射击', promptMap: '地图', promptSprint: '冲刺', paused: '已 暂 停', pauseHint: '点击屏幕继续', winTitle: '你 逃 出 来 了', winSub: '逃 脱 成 功', loseTitle: '你 被 抓 住 了', loseSub: '尺 子 落 下 的 声 音', endStats1: '收集笔记本：', endStats2: '用时：', endWinMsg: '身后的脚步声，终于停下了。', endLoseMsg: '它一直在等你犯错。', restartBtn: '再 来 一 次', safeTitle: '保 险 箱', safeSub: '解 锁 密 码', safeHint: '输入数字 · 回车提交 · ESC 取消', safeWrong: '✗ 密码错误', safeRight: '✓ 解锁成功', safeGet: '获得 ', safeShells: ' 发霰弹', mapTitle: '校 园 平 面 图', mapHint: '松开 M 收起地图', collectToast: '笔记本 +1', noAmmo: '没有子弹了…', stunToast: '怪物被眩晕了 30 秒', rageToast: '它 发 怒 了 ！ ×', startToast: '收集 7 本笔记本…', startToastSingle: '单机模式 · 收集 7 本笔记本…'
     }
   }
 };
 
 function T(key){ return I18N.t[I18N.current][key] || key; }
-
 function setLanguage(lang){
   I18N.current = lang;
   var t = I18N.t[lang];
@@ -280,49 +170,16 @@ function setLanguage(lang){
   function setText(id, val){ var e = el(id); if(e) e.textContent = val; }
   function setHtml(id, val){ var e = el(id); if(e) e.innerHTML = val; }
 
-  var langBtn = el('langBtn');
-  if(langBtn) langBtn.textContent = lang === 'en' ? '🌐 EN' : '🌐 中文';
-
-  setText('startSubtitle', t.subtitle);
-  setText('introText1', t.introText1);
-  setText('introText2', t.introText2);
-  setText('introText3', t.introText3);
-  setHtml('introText4', t.introText4);
-  setText('keyMapLabel', t.keyMapLabel);
-  setText('keySafeLabel', t.keySafeLabel);
-  setText('gunHintText', t.gunHintText);
-  setText('diffLabel', t.diffLabel);
-  setText('btnEasy', t.easyBtn);
-  setText('btnMedium', t.mediumBtn);
-  setText('roomLabel', t.roomLabel);
+  var langBtn = el('langBtn'); if(langBtn) langBtn.textContent = lang === 'en' ? '🌐 EN' : '🌐 中文';
+  setText('startSubtitle', t.subtitle); setText('introText1', t.introText1); setText('introText2', t.introText2); setText('introText3', t.introText3); setHtml('introText4', t.introText4); setText('keyMapLabel', t.keyMapLabel); setText('keySafeLabel', t.keySafeLabel); setText('gunHintText', t.gunHintText); setText('diffLabel', t.diffLabel); setText('btnEasy', t.easyBtn); setText('btnMedium', t.mediumBtn); setText('roomLabel', t.roomLabel);
   var ri = el('roomInput'); if(ri) ri.placeholder = t.roomPlaceholder;
-  setText('roomRandom', t.roomRandom);
-  setText('roomHint', t.roomHint);
-  setText('startBtn', t.startBtn);
-
-  setText('hudNotebooks', t.hudNotebooks);
-  setText('hudShots', t.hudShots);
-  setText('hudOnline', t.hudOnline);
-  setText('warning', t.warning);
-  setText('interactPrompt', t.pressE);
-  updateAmmoDisplay();
-  updateNetStatusText();
-  updatePrompt();
-
-  setText('pauseTitle', t.paused);
-  setText('pauseHint', t.pauseHint);
-  setText('restartBtn', t.restartBtn);
-  setText('puzzleTitle', t.safeTitle);
-  setText('puzzleSubtitle', t.safeSub);
-  setText('puzzleHint', t.safeHint);
-  setText('mapTitle', t.mapTitle);
-  setText('mapHint', t.mapHint);
+  setText('roomRandom', t.roomRandom); setText('roomHint', t.roomHint); setText('startBtn', t.startBtn);
+  setText('hudNotebooks', t.hudNotebooks); setText('hudShots', t.hudShots); setText('hudOnline', t.hudOnline); setText('warning', t.warning); setText('interactPrompt', t.pressE);
+  updateAmmoDisplay(); updateNetStatusText(); updatePrompt();
+  setText('pauseTitle', t.paused); setText('pauseHint', t.pauseHint); setText('restartBtn', t.restartBtn); setText('puzzleTitle', t.safeTitle); setText('puzzleSubtitle', t.safeSub); setText('puzzleHint', t.safeHint); setText('mapTitle', t.mapTitle); setText('mapHint', t.mapHint);
   updateRoomDisplay();
 }
-
-function toggleLanguage(){
-  setLanguage(I18N.current === 'en' ? 'zh' : 'en');
-}
+function toggleLanguage(){ setLanguage(I18N.current === 'en' ? 'zh' : 'en'); }
 
 /* ============================================================
  *  配置
@@ -335,17 +192,10 @@ var CONFIG = {
   NOTEBOOK_COUNT: 7, NOTEBOOK_PICK_DIST: 1.9,
   FOG_COLOR: 0x0a1410, FOG_NEAR: 5, FOG_FAR: 30,
   MAP_VIEW_RADIUS: 5,
-  GUN: {
-    RANGE: 16, COOLDOWN: 0.75, CONE_DOT: 0.82,
-    RAGE_CHANCE: 1/3, RAGE_SPEED_MULT: 1.25, RAGE_MULT_CAP: 3.0,
-    STUN_DURATION: 30, AMMO_PER_SAFE: 2,
-    SAFE_COUNT: 4, SAFE_INTERACT: 3.2
-  }
+  GUN: { RANGE: 16, COOLDOWN: 0.75, CONE_DOT: 0.82, RAGE_CHANCE: 1/3, RAGE_SPEED_MULT: 1.25, RAGE_MULT_CAP: 3.0, STUN_DURATION: 30, AMMO_PER_SAFE: 2, SAFE_COUNT: 4, SAFE_INTERACT: 3.2 }
 };
-var CELL = CONFIG.CELL;
-var MW = CONFIG.MAZE_W, MH = CONFIG.MAZE_H;
-var WORLD_W = MW * CELL, WORLD_H = MH * CELL;
-var OFF_X = -WORLD_W / 2, OFF_Z = -WORLD_H / 2;
+var CELL = CONFIG.CELL, MW = CONFIG.MAZE_W, MH = CONFIG.MAZE_H;
+var WORLD_W = MW * CELL, WORLD_H = MH * CELL, OFF_X = -WORLD_W / 2, OFF_Z = -WORLD_H / 2;
 
 function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
 function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t;} return a; }
@@ -355,14 +205,12 @@ function lerpAngle(a,b,t){ var d=b-a; while(d>Math.PI)d-=Math.PI*2; while(d<-Mat
 function formatTime(s){ var m=Math.floor(s/60), ss=Math.floor(s%60); return String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0'); }
 
 var Game = {
-  state: 'menu', time: 0,
-  notebooksFound: 0, notebooksTotal: CONFIG.NOTEBOOK_COUNT,
+  state: 'menu', time: 0, notebooksFound: 0, notebooksTotal: CONFIG.NOTEBOOK_COUNT,
   mapOpen: false, toastTimer: 0, dangerLevel: 0, footstepsTimer: 0,
-  ammo: 0, shootCooldown: 0, recoil: 0,
-  nearbySafe: null, currentSafe: null,
+  ammo: 0, shootCooldown: 0, recoil: 0, nearbySafe: null, currentSafe: null,
   puzzleInput: '', puzzleQuestion: null, puzzleResolving: false,
   difficulty: 'easy', online: false,
-  battery: 100, isStunned: false, stunTimer: 0
+  battery: 100, isStunned: false, stunTimer: 0, playerCount: 1 // 新增 playerCount 用于合并显示
 };
 
 /* ============================================================
@@ -370,40 +218,10 @@ var Game = {
  * ============================================================ */
 var SoundFX = {
   ctx:null, master:null, drone:null, droneGain:null, enabled:false,
-  init:function(){
-    if(this.ctx) return;
-    try{
-      var AC = window.AudioContext||window.webkitAudioContext;
-      this.ctx = new AC();
-      this.master = this.ctx.createGain();
-      this.master.gain.value = 0.85;
-      this.master.connect(this.ctx.destination);
-      this.enabled = true;
-    }catch(e){ this.enabled = false; }
-  },
+  init:function(){ if(this.ctx) return; try{ var AC = window.AudioContext||window.webkitAudioContext; this.ctx = new AC(); this.master = this.ctx.createGain(); this.master.gain.value = 0.85; this.master.connect(this.ctx.destination); this.enabled = true; }catch(e){ this.enabled = false; } },
   resume:function(){ if(this.ctx&&this.ctx.state==='suspended') this.ctx.resume(); },
-  tone:function(freq,dur,type,vol,slideTo){
-    if(!this.enabled||!this.ctx) return;
-    var t=this.ctx.currentTime;
-    var o=this.ctx.createOscillator(), g=this.ctx.createGain();
-    o.type=type||'square';
-    o.frequency.setValueAtTime(freq,t);
-    if(slideTo) o.frequency.exponentialRampToValueAtTime(Math.max(20,slideTo),t+dur);
-    g.gain.setValueAtTime(.0001,t);
-    g.gain.linearRampToValueAtTime(vol||.07,t+.012);
-    g.gain.exponentialRampToValueAtTime(.0001,t+dur);
-    o.connect(g); g.connect(this.master); o.start(t); o.stop(t+dur+.06);
-  },
-  noise:function(dur,vol,cutoff){
-    if(!this.enabled||!this.ctx) return;
-    var sr=this.ctx.sampleRate, len=Math.max(1,Math.floor(sr*dur));
-    var buf=this.ctx.createBuffer(1,len,sr), d=buf.getChannelData(0);
-    for(var i=0;i<len;i++) d[i]=(Math.random()*2-1)*(1-i/len);
-    var src=this.ctx.createBufferSource(); src.buffer=buf;
-    var f=this.ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=cutoff||1200;
-    var g=this.ctx.createGain(); g.gain.value=vol||.05;
-    src.connect(f); f.connect(g); g.connect(this.master); src.start();
-  },
+  tone:function(freq,dur,type,vol,slideTo){ if(!this.enabled||!this.ctx) return; var t=this.ctx.currentTime; var o=this.ctx.createOscillator(), g=this.ctx.createGain(); o.type=type||'square'; o.frequency.setValueAtTime(freq,t); if(slideTo) o.frequency.exponentialRampToValueAtTime(Math.max(20,slideTo),t+dur); g.gain.setValueAtTime(.0001,t); g.gain.linearRampToValueAtTime(vol||.07,t+.012); g.gain.exponentialRampToValueAtTime(.0001,t+dur); o.connect(g); g.connect(this.master); o.start(t); o.stop(t+dur+.06); },
+  noise:function(dur,vol,cutoff){ if(!this.enabled||!this.ctx) return; var sr=this.ctx.sampleRate, len=Math.max(1,Math.floor(sr*dur)); var buf=this.ctx.createBuffer(1,len,sr), d=buf.getChannelData(0); for(var i=0;i<len;i++) d[i]=(Math.random()*2-1)*(1-i/len); var src=this.ctx.createBufferSource(); src.buffer=buf; var f=this.ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=cutoff||1200; var g=this.ctx.createGain(); g.gain.value=vol||.05; src.connect(f); f.connect(g); g.connect(this.master); src.start(); },
   pickup:function(){ this.tone(880,.09,'square',.09); var s=this; setTimeout(function(){s.tone(1320,.14,'square',.08);},80); },
   footstep:function(){ this.noise(.08,.035,600); },
   alert:function(){ this.tone(220,.5,'sawtooth',.09,90); },
@@ -415,23 +233,8 @@ var SoundFX = {
   safeOpen:function(){ var s=this; this.tone(440,.12,'triangle',.08); setTimeout(function(){s.tone(660,.12,'triangle',.08);},90); setTimeout(function(){s.tone(880,.25,'triangle',.09);},180); },
   wrongAnswer:function(){ var s=this; this.tone(220,.16,'square',.09); setTimeout(function(){s.tone(160,.22,'square',.08);},100); },
   rage:function(){ this.tone(60,.9,'sawtooth',.16,25); this.tone(180,.6,'square',.09,70); },
-  startDrone:function(){
-    if(!this.enabled||!this.ctx||this.drone) return;
-    var t=this.ctx.currentTime;
-    var o1=this.ctx.createOscillator(); o1.type='sawtooth'; o1.frequency.value=52;
-    var o2=this.ctx.createOscillator(); o2.type='sawtooth'; o2.frequency.value=52.9;
-    var f=this.ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=190; f.Q.value=4;
-    var g=this.ctx.createGain(); g.gain.setValueAtTime(.0001,t);
-    o1.connect(f); o2.connect(f); f.connect(g); g.connect(this.master);
-    o1.start(t); o2.start(t);
-    this.drone={o1:o1,o2:o2,filt:f}; this.droneGain=g;
-  },
-  setDroneLevel:function(v){
-    if(!this.droneGain||!this.ctx) return;
-    var t=this.ctx.currentTime;
-    this.droneGain.gain.setTargetAtTime(Math.max(.0001,v),t,.25);
-    if(this.drone) this.drone.filt.frequency.setTargetAtTime(160+v*900,t,.3);
-  }
+  startDrone:function(){ if(!this.enabled||!this.ctx||this.drone) return; var t=this.ctx.currentTime; var o1=this.ctx.createOscillator(); o1.type='sawtooth'; o1.frequency.value=52; var o2=this.ctx.createOscillator(); o2.type='sawtooth'; o2.frequency.value=52.9; var f=this.ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=190; f.Q.value=4; var g=this.ctx.createGain(); g.gain.setValueAtTime(.0001,t); o1.connect(f); o2.connect(f); f.connect(g); g.connect(this.master); o1.start(t); o2.start(t); this.drone={o1:o1,o2:o2,filt:f}; this.droneGain=g; },
+  setDroneLevel:function(v){ if(!this.droneGain||!this.ctx) return; var t=this.ctx.currentTime; this.droneGain.gain.setTargetAtTime(Math.max(.0001,v),t,.25); if(this.drone) this.drone.filt.frequency.setTargetAtTime(160+v*900,t,.3); }
 };
 
 /* ============================================================
@@ -439,36 +242,10 @@ var SoundFX = {
  * ============================================================ */
 var grid = [];
 function generateMaze(){
-  grid = [];
-  for(var z=0;z<MH;z++) grid.push(new Array(MW).fill(1));
-  var stack=[[1,1]]; grid[1][1]=0;
-  var DIRS=[[0,-2],[0,2],[-2,0],[2,0]];
-  while(stack.length>0){
-    var cur=stack[stack.length-1];
-    var cx=cur[0], cz=cur[1];
-    var dirs=shuffle(DIRS.slice());
-    var carved=false;
-    for(var i=0;i<dirs.length;i++){
-      var dx=dirs[i][0], dz=dirs[i][1];
-      var nx=cx+dx, nz=cz+dz;
-      if(nx>0&&nz>0&&nx<MW-1&&nz<MH-1&&grid[nz][nx]===1){
-        grid[nz][nx]=0; grid[cz+dz/2][cx+dx/2]=0;
-        stack.push([nx,nz]); carved=true; break;
-      }
-    }
-    if(!carved) stack.pop();
-  }
-  var extra=Math.floor(MW*MH*0.06), guard=0;
-  while(extra>0&&guard<5000){
-    guard++;
-    var x=randInt(1,MW-2), z=randInt(1,MH-2);
-    if(grid[z][x]!==1) continue;
-    var horiz=grid[z][x-1]===0&&grid[z][x+1]===0;
-    var vert =grid[z-1][x]===0&&grid[z+1][x]===0;
-    if(horiz!==vert){ grid[z][x]=0; extra--; }
-  }
-  for(var xx=0;xx<MW;xx++){ grid[0][xx]=1; grid[MH-1][xx]=1; }
-  for(var zz=0;zz<MH;zz++){ grid[zz][0]=1; grid[zz][MW-1]=1; }
+  grid = []; for(var z=0;z<MH;z++) grid.push(new Array(MW).fill(1)); var stack=[[1,1]]; grid[1][1]=0; var DIRS=[[0,-2],[0,2],[-2,0],[2,0]];
+  while(stack.length>0){ var cur=stack[stack.length-1]; var cx=cur[0], cz=cur[1]; var dirs=shuffle(DIRS.slice()); var carved=false; for(var i=0;i<dirs.length;i++){ var dx=dirs[i][0], dz=dirs[i][1]; var nx=cx+dx, nz=cz+dz; if(nx>0&&nz>0&&nx<MW-1&&nz<MH-1&&grid[nz][nx]===1){ grid[nz][nx]=0; grid[cz+dz/2][cx+dx/2]=0; stack.push([nx,nz]); carved=true; break; } } if(!carved) stack.pop(); }
+  var extra=Math.floor(MW*MH*0.06), guard=0; while(extra>0&&guard<5000){ guard++; var x=randInt(1,MW-2), z=randInt(1,MH-2); if(grid[z][x]!==1) continue; var horiz=grid[z][x-1]===0&&grid[z][x+1]===0; var vert =grid[z-1][x]===0&&grid[z+1][x]===0; if(horiz!==vert){ grid[z][x]=0; extra--; } }
+  for(var xx=0;xx<MW;xx++){ grid[0][xx]=1; grid[MH-1][xx]=1; } for(var zz=0;zz<MH;zz++){ grid[zz][0]=1; grid[zz][MW-1]=1; }
 }
 function gridToWorld(gx,gz){ return new THREE.Vector3(OFF_X+(gx+0.5)*CELL, 0, OFF_Z+(gz+0.5)*CELL); }
 function worldToGrid(x,z){ return { gx: Math.floor((x-OFF_X)/CELL), gz: Math.floor((z-OFF_Z)/CELL) }; }
@@ -477,90 +254,14 @@ function isWallWorld(x,z){ var g=worldToGrid(x,z); return isWallGrid(g.gx,g.gz);
 function collides(x,z,r){ return isWallWorld(x-r,z-r)||isWallWorld(x+r,z-r)||isWallWorld(x-r,z+r)||isWallWorld(x+r,z+r); }
 function getOpenCells(){ var list=[]; for(var z=1;z<MH-1;z++) for(var x=1;x<MW-1;x++) if(grid[z][x]===0) list.push({gx:x,gz:z}); return list; }
 function bfsPath(sx,sz,tx,tz){
-  if(sx===tx&&sz===tz) return [];
-  if(isWallGrid(tx,tz)) return [];
-  var total=MW*MH;
-  var startIdx=sz*MW+sx, targetIdx=tz*MW+tx;
-  var prev=new Int32Array(total); prev.fill(-1);
-  var visited=new Uint8Array(total); visited[startIdx]=1;
-  var queue=[startIdx]; var head=0;
-  var DIRS=[[1,0],[-1,0],[0,1],[0,-1]];
-  var found=false;
-  while(head<queue.length){
-    var cur=queue[head++];
-    if(cur===targetIdx){ found=true; break; }
-    var cx=cur%MW, cz=(cur-cx)/MW;
-    for(var i=0;i<4;i++){
-      var nx=cx+DIRS[i][0], nz=cz+DIRS[i][1];
-      if(nx<0||nz<0||nx>=MW||nz>=MH) continue;
-      var ni=nz*MW+nx;
-      if(visited[ni]||grid[nz][nx]===1) continue;
-      visited[ni]=1; prev[ni]=cur; queue.push(ni);
-    }
-  }
-  if(!found||!visited[targetIdx]) return [];
-  var path=[]; var cur2=targetIdx;
-  while(cur2!==-1&&cur2!==startIdx){
-    var cx2=cur2%MW, cz2=(cur2-cx2)/MW;
-    path.push({gx:cx2,gz:cz2}); cur2=prev[cur2];
-  }
-  path.reverse(); return path;
+  if(sx===tx&&sz===tz) return []; if(isWallGrid(tx,tz)) return []; var total=MW*MH; var startIdx=sz*MW+sx, targetIdx=tz*MW+tx; var prev=new Int32Array(total); prev.fill(-1); var visited=new Uint8Array(total); visited[startIdx]=1; var queue=[startIdx]; var head=0; var DIRS=[[1,0],[-1,0],[0,1],[0,-1]]; var found=false;
+  while(head<queue.length){ var cur=queue[head++]; if(cur===targetIdx){ found=true; break; } var cx=cur%MW, cz=(cur-cx)/MW; for(var i=0;i<4;i++){ var nx=cx+DIRS[i][0], nz=cz+DIRS[i][1]; if(nx<0||nz<0||nx>=MW||nz>=MH) continue; var ni=nz*MW+nx; if(visited[ni]||grid[nz][nx]===1) continue; visited[ni]=1; prev[ni]=cur; queue.push(ni); } }
+  if(!found||!visited[targetIdx]) return []; var path=[]; var cur2=targetIdx; while(cur2!==-1&&cur2!==startIdx){ var cx2=cur2%MW, cz2=(cur2-cx2)/MW; path.push({gx:cx2,gz:cz2}); cur2=prev[cur2]; } path.reverse(); return path;
 }
-function makeWallTexture(){
-  var S=128, c=document.createElement('canvas'); c.width=c.height=S;
-  var g=c.getContext('2d');
-  g.fillStyle='#b8c46a'; g.fillRect(0,0,S,S);
-  for(var x=0;x<S;x+=16){ g.fillStyle=((x/16)%2===0)?'rgba(0,0,0,.10)':'rgba(255,255,255,.08)'; g.fillRect(x,0,8,S); }
-  g.fillStyle='rgba(0,0,0,.22)'; g.fillRect(0,S*.70,S,5);
-  for(var i=0;i<260;i++){ g.fillStyle='rgba(50,40,10,'+(Math.random()*.08).toFixed(3)+')'; g.fillRect(Math.random()*S,Math.random()*S,Math.random()*7+1,Math.random()*7+1); }
-  var t=new THREE.CanvasTexture(c);
-  t.wrapS=t.wrapT=THREE.RepeatWrapping; t.magFilter=THREE.NearestFilter;
-  return t;
-}
-function makeFloorTexture(){
-  var S=128, c=document.createElement('canvas'); c.width=c.height=S;
-  var g=c.getContext('2d');
-  g.fillStyle='#4a4e44'; g.fillRect(0,0,S,S);
-  var tile=32;
-  for(var y=0;y<S;y+=tile) for(var x=0;x<S;x+=tile){
-    var b=76+randInt(-10,10);
-    g.fillStyle='rgb('+b+','+(b+4)+','+(b-4)+')';
-    g.fillRect(x+1,y+1,tile-2,tile-2);
-  }
-  g.strokeStyle='rgba(0,0,0,.5)'; g.lineWidth=1;
-  for(var i=0;i<=S;i+=tile){
-    g.beginPath(); g.moveTo(i,0); g.lineTo(i,S); g.stroke();
-    g.beginPath(); g.moveTo(0,i); g.lineTo(S,i); g.stroke();
-  }
-  var t=new THREE.CanvasTexture(c);
-  t.wrapS=t.wrapT=THREE.RepeatWrapping; t.magFilter=THREE.NearestFilter;
-  return t;
-}
-function makeCeilTexture(){
-  var S=128, c=document.createElement('canvas'); c.width=c.height=S;
-  var g=c.getContext('2d');
-  g.fillStyle='#3a3e34'; g.fillRect(0,0,S,S);
-  var tile=64;
-  for(var y=0;y<S;y+=tile) for(var x=0;x<S;x+=tile){
-    g.fillStyle='rgba(255,255,255,.045)';
-    g.fillRect(x+2,y+2,tile-4,tile-4);
-  }
-  var t=new THREE.CanvasTexture(c);
-  t.wrapS=t.wrapT=THREE.RepeatWrapping;
-  return t;
-}
-function makeNotebookTexture(){
-  var S=128, c=document.createElement('canvas'); c.width=c.height=S;
-  var g=c.getContext('2d');
-  g.fillStyle='#e8e2c8'; g.fillRect(0,0,S,S);
-  g.fillStyle='#b03030'; g.fillRect(0,0,16,S);
-  g.strokeStyle='rgba(60,90,140,.5)';
-  for(var y=30;y<S-10;y+=12){ g.beginPath(); g.moveTo(24,y); g.lineTo(S-10,y); g.stroke(); }
-  g.fillStyle='#2a3a5a'; g.font='bold 17px monospace'; g.fillText('NOTE',30,22);
-  g.font='bold 13px monospace'; g.fillText('BOOK',30,38);
-  g.fillStyle='#d8a020'; g.beginPath(); g.arc(S-26,24,10,0,Math.PI*2); g.fill();
-  return new THREE.CanvasTexture(c);
-}
+function makeWallTexture(){ var S=128, c=document.createElement('canvas'); c.width=c.height=S; var g=c.getContext('2d'); g.fillStyle='#b8c46a'; g.fillRect(0,0,S,S); for(var x=0;x<S;x+=16){ g.fillStyle=((x/16)%2===0)?'rgba(0,0,0,.10)':'rgba(255,255,255,.08)'; g.fillRect(x,0,8,S); } g.fillStyle='rgba(0,0,0,.22)'; g.fillRect(0,S*.70,S,5); for(var i=0;i<260;i++){ g.fillStyle='rgba(50,40,10,'+(Math.random()*.08).toFixed(3)+')'; g.fillRect(Math.random()*S,Math.random()*S,Math.random()*7+1,Math.random()*7+1); } var t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.magFilter=THREE.NearestFilter; return t; }
+function makeFloorTexture(){ var S=128, c=document.createElement('canvas'); c.width=c.height=S; var g=c.getContext('2d'); g.fillStyle='#4a4e44'; g.fillRect(0,0,S,S); var tile=32; for(var y=0;y<S;y+=tile) for(var x=0;x<S;x+=tile){ var b=76+randInt(-10,10); g.fillStyle='rgb('+b+','+(b+4)+','+(b-4)+')'; g.fillRect(x+1,y+1,tile-2,tile-2); } g.strokeStyle='rgba(0,0,0,.5)'; g.lineWidth=1; for(var i=0;i<=S;i+=tile){ g.beginPath(); g.moveTo(i,0); g.lineTo(i,S); g.stroke(); g.beginPath(); g.moveTo(0,i); g.lineTo(S,i); g.stroke(); } var t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.magFilter=THREE.NearestFilter; return t; }
+function makeCeilTexture(){ var S=128, c=document.createElement('canvas'); c.width=c.height=S; var g=c.getContext('2d'); g.fillStyle='#3a3e34'; g.fillRect(0,0,S,S); var tile=64; for(var y=0;y<S;y+=tile) for(var x=0;x<S;x+=tile){ g.fillStyle='rgba(255,255,255,.045)'; g.fillRect(x+2,y+2,tile-4,tile-4); } var t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; return t; }
+function makeNotebookTexture(){ var S=128, c=document.createElement('canvas'); c.width=c.height=S; var g=c.getContext('2d'); g.fillStyle='#e8e2c8'; g.fillRect(0,0,S,S); g.fillStyle='#b03030'; g.fillRect(0,0,16,S); g.strokeStyle='rgba(60,90,140,.5)'; for(var y=30;y<S-10;y+=12){ g.beginPath(); g.moveTo(24,y); g.lineTo(S-10,y); g.stroke(); } g.fillStyle='#2a3a5a'; g.font='bold 17px monospace'; g.fillText('NOTE',30,22); g.font='bold 13px monospace'; g.fillText('BOOK',30,38); g.fillStyle='#d8a020'; g.beginPath(); g.arc(S-26,24,10,0,Math.PI*2); g.fill(); return new THREE.CanvasTexture(c); }
 
 /* ============================================================
  *  Three.js 场景
@@ -569,100 +270,50 @@ var canvas = document.getElementById('gameCanvas');
 var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias:false });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
 renderer.setSize(window.innerWidth, window.innerHeight);
-var scene = new THREE.Scene();
-scene.background = new THREE.Color(CONFIG.FOG_COLOR);
-scene.fog = new THREE.Fog(CONFIG.FOG_COLOR, CONFIG.FOG_NEAR, CONFIG.FOG_FAR);
-var camera = new THREE.PerspectiveCamera(76, window.innerWidth/window.innerHeight, 0.08, 200);
-camera.rotation.order = 'YXZ';
-scene.add(camera);
+var scene = new THREE.Scene(); scene.background = new THREE.Color(CONFIG.FOG_COLOR); scene.fog = new THREE.Fog(CONFIG.FOG_COLOR, CONFIG.FOG_NEAR, CONFIG.FOG_FAR);
+var camera = new THREE.PerspectiveCamera(76, window.innerWidth/window.innerHeight, 0.08, 200); camera.rotation.order = 'YXZ'; scene.add(camera);
 var ambientLight = new THREE.AmbientLight(0x707868, 1.05); scene.add(ambientLight);
 var hemiLight = new THREE.HemisphereLight(0xa8c090, 0x2a3020, 0.75); scene.add(hemiLight);
 var playerLight = new THREE.PointLight(0xffe9b0, 1.5, 18, 1.7); scene.add(playerLight);
 var fillLight = new THREE.PointLight(0x5080c0, 0.5, 32, 2); scene.add(fillLight);
-var wallTex = makeWallTexture();
-var floorTex = makeFloorTexture();
-var ceilTex = makeCeilTexture();
-var mazeGroup = new THREE.Group();
-scene.add(mazeGroup);
+var wallTex = makeWallTexture(), floorTex = makeFloorTexture(), ceilTex = makeCeilTexture();
+var mazeGroup = new THREE.Group(); scene.add(mazeGroup);
 
 function buildMazeMeshes(){
-  while(mazeGroup.children.length>0){
-    var ch=mazeGroup.children.pop();
-    if(ch.geometry) ch.geometry.dispose();
-    if(ch.material){
-      if(Array.isArray(ch.material)) ch.material.forEach(function(m){m.dispose();});
-      else ch.material.dispose();
-    }
-  }
-  var floorMat = new THREE.MeshLambertMaterial({ map: floorTex });
-  floorTex.repeat.set(MW, MH);
-  var floor = new THREE.Mesh(new THREE.PlaneGeometry(WORLD_W, WORLD_H), floorMat);
-  floor.rotation.x = -Math.PI/2; mazeGroup.add(floor);
-  var ceilMat = new THREE.MeshLambertMaterial({ map: ceilTex });
-  ceilTex.repeat.set(MW/2, MH/2);
-  var ceil = new THREE.Mesh(new THREE.PlaneGeometry(WORLD_W, WORLD_H), ceilMat);
-  ceil.rotation.x = Math.PI/2; ceil.position.y = CONFIG.WALL_HEIGHT; mazeGroup.add(ceil);
-  var wallGeo = new THREE.BoxGeometry(CELL, CONFIG.WALL_HEIGHT, CELL);
-  var wallMat = new THREE.MeshLambertMaterial({ map: wallTex });
-  wallTex.repeat.set(1,1);
-  for(var z=0;z<MH;z++) for(var x=0;x<MW;x++){
-    if(grid[z][x]!==1) continue;
-    var m = new THREE.Mesh(wallGeo, wallMat);
-    var p = gridToWorld(x,z);
-    m.position.set(p.x, CONFIG.WALL_HEIGHT/2, p.z);
-    mazeGroup.add(m);
-  }
-  var lampGeo = new THREE.BoxGeometry(2.2,0.12,0.5);
-  var lampMat = new THREE.MeshBasicMaterial({ color:0xe8f0c0 });
-  for(var i=0;i<14;i++){
-    var gx=randInt(1,MW-2), gz=randInt(1,MH-2);
-    if(grid[gz][gx]===1) continue;
-    var lamp = new THREE.Mesh(lampGeo, lampMat);
-    var p2 = gridToWorld(gx,gz);
-    lamp.position.set(p2.x, CONFIG.WALL_HEIGHT-0.12, p2.z);
-    mazeGroup.add(lamp);
-  }
+  while(mazeGroup.children.length>0){ var ch=mazeGroup.children.pop(); if(ch.geometry) ch.geometry.dispose(); if(ch.material){ if(Array.isArray(ch.material)) ch.material.forEach(function(m){m.dispose();}); else ch.material.dispose(); } }
+  var floorMat = new THREE.MeshLambertMaterial({ map: floorTex }); floorTex.repeat.set(MW, MH); var floor = new THREE.Mesh(new THREE.PlaneGeometry(WORLD_W, WORLD_H), floorMat); floor.rotation.x = -Math.PI/2; mazeGroup.add(floor);
+  var ceilMat = new THREE.MeshLambertMaterial({ map: ceilTex }); ceilTex.repeat.set(MW/2, MH/2); var ceil = new THREE.Mesh(new THREE.PlaneGeometry(WORLD_W, WORLD_H), ceilMat); ceil.rotation.x = Math.PI/2; ceil.position.y = CONFIG.WALL_HEIGHT; mazeGroup.add(ceil);
+  var wallGeo = new THREE.BoxGeometry(CELL, CONFIG.WALL_HEIGHT, CELL); var wallMat = new THREE.MeshLambertMaterial({ map: wallTex }); wallTex.repeat.set(1,1);
+  for(var z=0;z<MH;z++) for(var x=0;x<MW;x++){ if(grid[z][x]!==1) continue; var m = new THREE.Mesh(wallGeo, wallMat); var p = gridToWorld(x,z); m.position.set(p.x, CONFIG.WALL_HEIGHT/2, p.z); mazeGroup.add(m); }
+  var lampGeo = new THREE.BoxGeometry(2.2,0.12,0.5); var lampMat = new THREE.MeshBasicMaterial({ color:0xe8f0c0 });
+  for(var i=0;i<14;i++){ var gx=randInt(1,MW-2), gz=randInt(1,MH-2); if(grid[gz][gx]===1) continue; var lamp = new THREE.Mesh(lampGeo, lampMat); var p2 = gridToWorld(gx,gz); lamp.position.set(p2.x, CONFIG.WALL_HEIGHT-0.12, p2.z); mazeGroup.add(lamp); }
 }
 
 /* ============================================================
  *  联机模块
  * ============================================================ */
-var socket = null;
-var otherPlayers = {};
-var playerCountEl = document.getElementById('playerCount');
+var socket = null; var otherPlayers = {};
 var netStatusEl = document.getElementById('netStatus');
-var roomInput = document.getElementById('roomInput');
-var roomRandom = document.getElementById('roomRandom');
+var roomInput = document.getElementById('roomInput'), roomRandom = document.getElementById('roomRandom');
 var roomDisplay = null;
 
 function updateNetStatusText(){
   if(!netStatusEl) return;
-  if(Game.online){ netStatusEl.textContent = T('modeOnline'); netStatusEl.classList.add('online'); }
-  else { netStatusEl.textContent = T('modeSingle'); netStatusEl.classList.remove('online'); }
+  // ★ 修复：合并人数和状态，避免 UI 重叠
+  if(Game.online){
+    netStatusEl.innerHTML = '🟢 ' + T('hudOnline') + ': ' + Game.playerCount;
+    netStatusEl.classList.add('online');
+  } else {
+    netStatusEl.innerHTML = T('modeSingle');
+    netStatusEl.classList.remove('online');
+  }
 }
-function updatePrompt(){
-  var p = document.getElementById('prompt');
-  if(!p) return;
-  p.innerHTML = '<span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> ' + T('promptMove') + ' · ' + T('promptLook') + ' · ' + T('promptShoot') + ' · <span class="key">M</span> ' + T('promptMap') + ' · <span class="key">Shift</span> ' + T('promptSprint');
-}
-function updateRoomDisplay(){
-  if(!roomDisplay) return;
-  if(roomDisplay.style.display === 'none') return;
-  var txt = roomDisplay.textContent || '';
-  var parts = txt.split(': ');
-  var code = parts.length > 1 ? parts[parts.length-1] : '----';
-  if(I18N.current === 'en') roomDisplay.textContent = '🏠 Room: ' + code;
-  else roomDisplay.textContent = '🏠 房间: ' + code;
-}
+function updatePrompt(){ var p = document.getElementById('prompt'); if(!p) return; p.innerHTML = '<span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> ' + T('promptMove') + ' · ' + T('promptLook') + ' · ' + T('promptShoot') + ' · <span class="key">M</span> ' + T('promptMap') + ' · <span class="key">Shift</span> ' + T('promptSprint'); }
+function updateRoomDisplay(){ if(!roomDisplay) return; if(roomDisplay.style.display === 'none') return; var txt = roomDisplay.textContent || ''; var parts = txt.split(': '); var code = parts.length > 1 ? parts[parts.length-1] : '----'; if(I18N.current === 'en') roomDisplay.textContent = '🏠 Room: ' + code; else roomDisplay.textContent = '🏠 房间: ' + code; }
+
 (function tryLoadSocketIO(){
-  var s = document.createElement('script');
-  s.src = '/socket.io/socket.io.js';
-  s.async = true;
-  s.onload = function(){
-    if(typeof io === 'undefined'){ setNetStatus(false); return; }
-    try { socket = io({ reconnectionAttempts: 3, timeout: 4000 }); setupSocketListeners(); } 
-    catch(e){ socket = null; Game.online = false; setNetStatus(false); }
-  };
+  var s = document.createElement('script'); s.src = '/socket.io/socket.io.js'; s.async = true;
+  s.onload = function(){ if(typeof io === 'undefined'){ setNetStatus(false); return; } try { socket = io({ reconnectionAttempts: 3, timeout: 4000 }); setupSocketListeners(); } catch(e){ socket = null; Game.online = false; setNetStatus(false); } };
   s.onerror = function(){ setNetStatus(false); };
   document.head.appendChild(s);
 })();
@@ -675,19 +326,17 @@ if(roomInput) roomInput.value = randomRoomCode();
 function addOtherPlayer(data){
   if(!data || !data.id || otherPlayers[data.id]) return;
   var group = new THREE.Group();
-  var body = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 1.4, 8), new THREE.MeshLambertMaterial({ color: 0x3b82f6 }));
-  body.position.y = 0.7; group.add(body);
-  var head = new THREE.Mesh(new THREE.SphereGeometry(0.32, 8, 8), new THREE.MeshLambertMaterial({ color: 0xffcc99 }));
-  head.position.y = 1.65; group.add(head);
-  group.position.set(data.x || 0, 0, data.z || 0);
-  scene.add(group);
+  var body = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 1.4, 8), new THREE.MeshLambertMaterial({ color: 0x3b82f6 })); body.position.y = 0.7; group.add(body);
+  var head = new THREE.Mesh(new THREE.SphereGeometry(0.32, 8, 8), new THREE.MeshLambertMaterial({ color: 0xffcc99 })); head.position.y = 1.65; group.add(head);
+  // 增加一个头顶标记，方便区分队友
+  var marker = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 4), new THREE.MeshBasicMaterial({ color: 0xffe066 }));
+  marker.position.y = 2.2; group.add(marker);
+  group.position.set(data.x || 0, 0, data.z || 0); scene.add(group);
   otherPlayers[data.id] = { mesh: group, targetPos: new THREE.Vector3(data.x || 0, 0, data.z || 0), targetYaw: data.yaw || 0 };
-  if(playerCountEl) playerCountEl.innerHTML = '🌐 ' + T('hudOnline') + ': ' + (Object.keys(otherPlayers).length + 1);
+  Game.playerCount = Object.keys(otherPlayers).length + 1; updateNetStatusText();
 }
-function clearOtherPlayers(){
-  Object.keys(otherPlayers).forEach(function(id){ scene.remove(otherPlayers[id].mesh); delete otherPlayers[id]; });
-  if(playerCountEl) playerCountEl.innerHTML = '🌐 ' + T('hudOnline') + ': 1';
-}
+function clearOtherPlayers(){ Object.keys(otherPlayers).forEach(function(id){ scene.remove(otherPlayers[id].mesh); delete otherPlayers[id]; }); Game.playerCount = 1; updateNetStatusText(); }
+
 function setupSocketListeners(){
   socket.on('connect', function(){ setNetStatus(true); clearOtherPlayers(); });
   socket.on('disconnect', function(){ clearOtherPlayers(); });
@@ -695,25 +344,17 @@ function setupSocketListeners(){
     if(!data) return; clearOtherPlayers();
     var count = 0;
     Object.keys(data.players || {}).forEach(function(id){ count++; if(id !== socket.id) addOtherPlayer(data.players[id]); });
-    if(playerCountEl) playerCountEl.innerHTML = '🌐 ' + T('hudOnline') + ': ' + count;
+    Game.playerCount = count; updateNetStatusText();
   });
   socket.on('playerJoined', function(data){ addOtherPlayer(data); });
-  socket.on('playerMoved', function(data){
-    if(!data || !otherPlayers[data.id]) return;
-    otherPlayers[data.id].targetPos.set(data.x, 0, data.z);
-    otherPlayers[data.id].targetYaw = data.yaw;
-  });
-  socket.on('playerLeft', function(id){
-    if(otherPlayers[id]){ scene.remove(otherPlayers[id].mesh); delete otherPlayers[id]; if(playerCountEl) playerCountEl.innerHTML = '🌐 ' + T('hudOnline') + ': ' + (Object.keys(otherPlayers).length + 1); }
-  });
-  // ★ 新增：接收被打晕的事件
+  socket.on('playerMoved', function(data){ if(!data || !otherPlayers[data.id]) return; otherPlayers[data.id].targetPos.set(data.x, 0, data.z); otherPlayers[data.id].targetYaw = data.yaw; });
+  socket.on('playerLeft', function(id){ if(otherPlayers[id]){ scene.remove(otherPlayers[id].mesh); delete otherPlayers[id]; Game.playerCount = Object.keys(otherPlayers).length + 1; updateNetStatusText(); } });
+  // ★ 修复：接收被打晕的事件
   socket.on('playerStunned', function(data){
     if(data.targetId === socket.id){
-      Game.isStunned = true;
-      Game.stunTimer = 3.0;
+      Game.isStunned = true; Game.stunTimer = 3.0;
       document.getElementById('stunOverlay').style.opacity = '1';
-      showToast("💥 你被队友打晕了！", 2.0);
-      SoundFX.caught();
+      showToast("💥 你被队友打晕了！", 2.0); SoundFX.caught();
     }
   });
 }
@@ -724,41 +365,22 @@ function setupSocketListeners(){
 var player = { pos: new THREE.Vector3(), yaw: 0, pitch: 0, bobPhase: 0, bobAmount: 0, moving: false, sprinting: false };
 function spawnPlayer(){
   var p = gridToWorld(1,1); player.pos.set(p.x, 0, p.z);
-  var chosenYaw = 0;
-  if(grid[1][2] === 0) chosenYaw = -Math.PI/2;
-  else if(grid[2][1] === 0) chosenYaw = Math.PI;
-  else if(grid[2][2] === 0) chosenYaw = Math.PI * 0.75;
-  else if(grid[1][0] === 0) chosenYaw = Math.PI/2;
+  var chosenYaw = 0; if(grid[1][2] === 0) chosenYaw = -Math.PI/2; else if(grid[2][1] === 0) chosenYaw = Math.PI; else if(grid[2][2] === 0) chosenYaw = Math.PI * 0.75; else if(grid[1][0] === 0) chosenYaw = Math.PI/2;
   player.yaw = chosenYaw; player.pitch = 0; player.bobPhase = 0; player.bobAmount = 0;
 }
-
 var gunGroup = null, muzzleLight = null;
 function createShotgunModel(){
   var g = new THREE.Group();
   var metalMat = new THREE.MeshLambertMaterial({ color: 0x35353c });
   var darkMetal = new THREE.MeshLambertMaterial({ color: 0x1e1e22 });
   var woodMat = new THREE.MeshLambertMaterial({ color: 0x5a3418 });
-  var barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.038,0.040,0.78,10), metalMat);
-  barrel.rotation.x = Math.PI/2; barrel.position.set(0, 0.012, -0.48); g.add(barrel);
-  var receiver = new THREE.Mesh(new THREE.BoxGeometry(0.10,0.13,0.28), darkMetal);
-  receiver.position.set(0, -0.016, -0.12); g.add(receiver);
-  var stock = new THREE.Mesh(new THREE.BoxGeometry(0.085,0.11,0.34), woodMat);
-  stock.position.set(0, -0.045, 0.20); g.add(stock);
+  var barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.038,0.040,0.78,10), metalMat); barrel.rotation.x = Math.PI/2; barrel.position.set(0, 0.012, -0.48); g.add(barrel);
+  var receiver = new THREE.Mesh(new THREE.BoxGeometry(0.10,0.13,0.28), darkMetal); receiver.position.set(0, -0.016, -0.12); g.add(receiver);
+  var stock = new THREE.Mesh(new THREE.BoxGeometry(0.085,0.11,0.34), woodMat); stock.position.set(0, -0.045, 0.20); g.add(stock);
   return g;
 }
-function setupGun(){
-  gunGroup = createShotgunModel(); camera.add(gunGroup);
-  muzzleLight = new THREE.PointLight(0xffdd88, 0, 12, 2); muzzleLight.position.set(0.28, -0.10, -0.9); camera.add(muzzleLight);
-  updateGunTransform(0);
-}
-function updateGunTransform(dt){
-  if(!gunGroup) return;
-  Game.recoil = Math.max(0, Game.recoil - dt*5.2);
-  var eased = Game.recoil * Game.recoil;
-  gunGroup.position.set(0.29, -0.235 - eased*0.055, -0.55 + eased*0.14);
-  gunGroup.rotation.set(eased*0.32, 0, 0);
-  if(muzzleLight && muzzleLight.intensity > 0) muzzleLight.intensity = Math.max(0, muzzleLight.intensity - dt*42);
-}
+function setupGun(){ gunGroup = createShotgunModel(); camera.add(gunGroup); muzzleLight = new THREE.PointLight(0xffdd88, 0, 12, 2); muzzleLight.position.set(0.28, -0.10, -0.9); camera.add(muzzleLight); updateGunTransform(0); }
+function updateGunTransform(dt){ if(!gunGroup) return; Game.recoil = Math.max(0, Game.recoil - dt*5.2); var eased = Game.recoil * Game.recoil; gunGroup.position.set(0.29, -0.235 - eased*0.055, -0.55 + eased*0.14); gunGroup.rotation.set(eased*0.32, 0, 0); if(muzzleLight && muzzleLight.intensity > 0) muzzleLight.intensity = Math.max(0, muzzleLight.intensity - dt*42); }
 
 var monsters = [];
 function createMonsterMesh(){
@@ -770,75 +392,45 @@ function createMonsterMesh(){
   var legL = new THREE.Mesh(legGeo, pantsMat); legL.position.set(-0.22,0.45,0);
   var legR = new THREE.Mesh(legGeo, pantsMat); legR.position.set(0.22,0.45,0);
   g.add(legL, legR);
-  var torso = new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.37,1.1,10), shirtMat);
-  torso.position.y = 1.45; g.add(torso);
+  var torso = new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.37,1.1,10), shirtMat); torso.position.y = 1.45; g.add(torso);
   var armGeo = new THREE.CylinderGeometry(0.11,0.11,0.95,8);
   var armL = new THREE.Mesh(armGeo, shirtMat); armL.position.set(-0.53,1.52,0); armL.rotation.z = 0.24;
   var armR = new THREE.Mesh(armGeo, shirtMat); armR.position.set(0.53,1.52,0); armR.rotation.z = -0.24;
   g.add(armL, armR);
-  var head = new THREE.Mesh(new THREE.SphereGeometry(0.46,16,12), skinMat);
-  head.position.y = 2.3; head.scale.set(1,1.1,1); g.add(head);
-  var stunRing = new THREE.Mesh(new THREE.TorusGeometry(0.48,0.055,6,18), new THREE.MeshBasicMaterial({ color: 0xffdd44, transparent:true, opacity:0.92 }));
-  stunRing.rotation.x = Math.PI/2; stunRing.position.y = 3.10; stunRing.visible = false; g.add(stunRing);
-  var rageRing = new THREE.Mesh(new THREE.TorusGeometry(0.55,0.04,6,20), new THREE.MeshBasicMaterial({ color: 0xff3020, transparent:true, opacity:0.75 }));
-  rageRing.rotation.x = Math.PI/2; rageRing.position.y = 0.05; rageRing.visible = false; g.add(rageRing);
+  var head = new THREE.Mesh(new THREE.SphereGeometry(0.46,16,12), skinMat); head.position.y = 2.3; head.scale.set(1,1.1,1); g.add(head);
+  var stunRing = new THREE.Mesh(new THREE.TorusGeometry(0.48,0.055,6,18), new THREE.MeshBasicMaterial({ color: 0xffdd44, transparent:true, opacity:0.92 })); stunRing.rotation.x = Math.PI/2; stunRing.position.y = 3.10; stunRing.visible = false; g.add(stunRing);
+  var rageRing = new THREE.Mesh(new THREE.TorusGeometry(0.55,0.04,6,20), new THREE.MeshBasicMaterial({ color: 0xff3020, transparent:true, opacity:0.75 })); rageRing.rotation.x = Math.PI/2; rageRing.position.y = 0.05; rageRing.visible = false; g.add(rageRing);
   g.userData = { legL: legL, legR: legR, armL: armL, armR: armR, stunRing: stunRing, rageRing: rageRing, shirtMat: shirtMat };
   return g;
 }
 function spawnMonsters(){
   monsters.forEach(function(m){ scene.remove(m.group); }); monsters.length = 0;
-  var count = (Game.difficulty === 'medium') ? 2 : 1;
-  var open = getOpenCells();
-  var spawnPoints = [];
-  for(var i=0;i<count;i++){
-    var best = null, bestDist = -1;
-    for(var j=0;j<open.length;j++){
-      var c = open[j], wp = gridToWorld(c.gx, c.gz);
-      var minDist = wp.distanceTo(player.pos);
-      for(var k=0;k<spawnPoints.length;k++){ var d = wp.distanceTo(spawnPoints[k]); if(d < minDist) minDist = d; }
-      if(minDist > bestDist){ bestDist = minDist; best = c; }
-    }
-    if(best) spawnPoints.push(gridToWorld(best.gx, best.gz));
-  }
-  spawnPoints.forEach(function(wp, i){
-    var group = createMonsterMesh(); group.position.set(wp.x, 0, wp.z); scene.add(group);
-    monsters.push({ group: group, path: [], pathIndex: 0, repathTimer: 0, walkPhase: 0, facing: 0, catchCooldown: 0, alertPlayed: false, stunTimer: 0, rageMultiplier: 1.0, index: i });
-  });
+  var count = (Game.difficulty === 'medium') ? 2 : 1; var open = getOpenCells(); var spawnPoints = [];
+  for(var i=0;i<count;i++){ var best = null, bestDist = -1; for(var j=0;j<open.length;j++){ var c = open[j], wp = gridToWorld(c.gx, c.gz); var minDist = wp.distanceTo(player.pos); for(var k=0;k<spawnPoints.length;k++){ var d = wp.distanceTo(spawnPoints[k]); if(d < minDist) minDist = d; } if(minDist > bestDist){ bestDist = minDist; best = c; } } if(best) spawnPoints.push(gridToWorld(best.gx, best.gz)); }
+  spawnPoints.forEach(function(wp, i){ var group = createMonsterMesh(); group.position.set(wp.x, 0, wp.z); scene.add(group); monsters.push({ group: group, path: [], pathIndex: 0, repathTimer: 0, walkPhase: 0, facing: 0, catchCooldown: 0, alertPlayed: false, stunTimer: 0, rageMultiplier: 1.0, index: i }); });
 }
 
 var notebooks = []; var notebookTex = null;
-function createNotebookMesh(){
-  var group = new THREE.Group();
-  var body = new THREE.Mesh(new THREE.BoxGeometry(0.62,0.82,0.14), new THREE.MeshLambertMaterial({ map: notebookTex, emissive:0x554400, emissiveIntensity:0.7 }));
-  group.add(body);
-  var light = new THREE.PointLight(0xffcc55, 1.0, 8, 2); group.add(light);
-  return group;
-}
+function createNotebookMesh(){ var group = new THREE.Group(); var body = new THREE.Mesh(new THREE.BoxGeometry(0.62,0.82,0.14), new THREE.MeshLambertMaterial({ map: notebookTex, emissive:0x554400, emissiveIntensity:0.7 })); group.add(body); var light = new THREE.PointLight(0xffcc55, 1.0, 8, 2); group.add(light); return group; }
 function spawnNotebooks(){
-  notebooks.forEach(function(nb){ scene.remove(nb.mesh); }); notebooks.length = 0;
-  if(!notebookTex) notebookTex = makeNotebookTexture();
+  notebooks.forEach(function(nb){ scene.remove(nb.mesh); }); notebooks.length = 0; if(!notebookTex) notebookTex = makeNotebookTexture();
   var open = getOpenCells(); var candidates = [];
   for(var i=0;i<open.length;i++){ var c = open[i], wp = gridToWorld(c.gx,c.gz); if(wp.distanceTo(player.pos) > CELL*6) candidates.push({gx:c.gx,gz:c.gz,pos:wp}); }
   shuffle(candidates);
-  for(var j=0;j<CONFIG.NOTEBOOK_COUNT && j<candidates.length;j++){
-    var c2 = candidates[j], mesh = createNotebookMesh();
-    mesh.position.set(c2.pos.x, 1.25, c2.pos.z); scene.add(mesh);
-    notebooks.push({ mesh: mesh, gx:c2.gx, gz:c2.gz, collected:false, phase: Math.random()*Math.PI*2, index:j });
-  }
+  for(var j=0;j<CONFIG.NOTEBOOK_COUNT && j<candidates.length;j++){ var c2 = candidates[j], mesh = createNotebookMesh(); mesh.position.set(c2.pos.x, 1.25, c2.pos.z); scene.add(mesh); notebooks.push({ mesh: mesh, gx:c2.gx, gz:c2.gz, collected:false, phase: Math.random()*Math.PI*2, index:j }); }
   Game.notebooksTotal = notebooks.length; Game.notebooksFound = 0;
 }
 
-// ★ 新增：电池系统
+// ★ 修复：电池数量增加，生成逻辑优化
 var batteries = [];
 function spawnBatteries(){
   batteries.forEach(function(b){ scene.remove(b.mesh); }); batteries.length = 0;
   var open = getOpenCells();
-  for(var i=0; i<8; i++){
-    var c = open[randInt(0, open.length-1)];
-    var wp = gridToWorld(c.gx, c.gz);
+  for(var i=0; i<15; i++){ // 增加到 15 个电池
+    var c = open[randInt(0, open.length-1)]; var wp = gridToWorld(c.gx, c.gz);
     if(wp.distanceTo(player.pos) < 5) continue;
     var group = new THREE.Group();
-    var body = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.4, 8), new THREE.MeshLambertMaterial({ color: 0x00ffcc, emissive: 0x004433 }));
+    var body = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.45, 8), new THREE.MeshLambertMaterial({ color: 0x00ffcc, emissive: 0x004433 }));
     body.position.y = 0.8; group.add(body);
     var glow = new THREE.PointLight(0x00ffcc, 0.8, 5); group.add(glow);
     group.position.set(wp.x, 0, wp.z); scene.add(group);
@@ -847,103 +439,40 @@ function spawnBatteries(){
 }
 function updateBatteries(dt){
   for(var i=0; i<batteries.length; i++){
-    var b = batteries[i];
-    b.phase += dt * 3; b.mesh.position.y = Math.sin(b.phase) * 0.2; b.mesh.rotation.y += dt * 2;
+    var b = batteries[i]; b.phase += dt * 3; b.mesh.position.y = Math.sin(b.phase) * 0.2; b.mesh.rotation.y += dt * 2;
     var dx = b.mesh.position.x - player.pos.x, dz = b.mesh.position.z - player.pos.z;
-    if(Math.hypot(dx, dz) < 1.8){
-      Game.battery = Math.min(100, Game.battery + 30);
-      SoundFX.pickup(); showToast("🔋 电量 +30%", 1.5);
-      scene.remove(b.mesh); batteries.splice(i, 1); i--;
-    }
+    if(Math.hypot(dx, dz) < 1.8){ Game.battery = Math.min(100, Game.battery + 30); SoundFX.pickup(); showToast("🔋 电量 +30%", 1.5); scene.remove(b.mesh); batteries.splice(i, 1); i--; }
   }
 }
 
 var safes = [];
-function createSafeMesh(){
-  var g = new THREE.Group();
-  var body = new THREE.Mesh(new THREE.BoxGeometry(1.10,0.90,0.80), new THREE.MeshLambertMaterial({ color: 0x5a5a62 }));
-  body.position.y = 0.55; g.add(body);
-  var dial = new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,0.06,16), new THREE.MeshLambertMaterial({ color: 0xd8b858, emissive:0x553300 }));
-  dial.rotation.x = Math.PI/2; dial.position.set(-0.22,0.55,0.50); g.add(dial);
-  var lightMesh = new THREE.Mesh(new THREE.SphereGeometry(0.055,8,8), new THREE.MeshBasicMaterial({ color: 0xffdd66 }));
-  lightMesh.position.set(0,1.10,0.42); g.add(lightMesh);
-  g.userData = { lightMesh: lightMesh };
-  return g;
-}
+function createSafeMesh(){ var g = new THREE.Group(); var body = new THREE.Mesh(new THREE.BoxGeometry(1.10,0.90,0.80), new THREE.MeshLambertMaterial({ color: 0x5a5a62 })); body.position.y = 0.55; g.add(body); var dial = new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,0.06,16), new THREE.MeshLambertMaterial({ color: 0xd8b858, emissive:0x553300 })); dial.rotation.x = Math.PI/2; dial.position.set(-0.22,0.55,0.50); g.add(dial); var lightMesh = new THREE.Mesh(new THREE.SphereGeometry(0.055,8,8), new THREE.MeshBasicMaterial({ color: 0xffdd66 })); lightMesh.position.set(0,1.10,0.42); g.add(lightMesh); g.userData = { lightMesh: lightMesh }; return g; }
 function spawnSafes(){
-  safes.forEach(function(s){ scene.remove(s.group); }); safes.length = 0;
-  var noteSet = {}; notebooks.forEach(function(nb){ noteSet[nb.gx+','+nb.gz] = true; });
+  safes.forEach(function(s){ scene.remove(s.group); }); safes.length = 0; var noteSet = {}; notebooks.forEach(function(nb){ noteSet[nb.gx+','+nb.gz] = true; });
   var open = getOpenCells(); var candidates = [];
   for(var i=0;i<open.length;i++){ var c = open[i]; if(noteSet[c.gx+','+c.gz]) continue; var wp = gridToWorld(c.gx,c.gz); if(wp.distanceTo(player.pos) > CELL*4) candidates.push({gx:c.gx,gz:c.gz,wp:wp}); }
   shuffle(candidates);
-  for(var j=0;j<CONFIG.GUN.SAFE_COUNT && j<candidates.length;j++){
-    var c2 = candidates[j], mesh = createSafeMesh();
-    mesh.position.set(c2.wp.x, 0, c2.wp.z); scene.add(mesh);
-    safes.push({ group: mesh, gx: c2.gx, gz: c2.gz, opened: false, phase: Math.random()*Math.PI*2 });
-  }
+  for(var j=0;j<CONFIG.GUN.SAFE_COUNT && j<candidates.length;j++){ var c2 = candidates[j], mesh = createSafeMesh(); mesh.position.set(c2.wp.x, 0, c2.wp.z); scene.add(mesh); safes.push({ group: mesh, gx: c2.gx, gz: c2.gz, opened: false, phase: Math.random()*Math.PI*2 }); }
 }
-function generateMathQuestion(){
-  var type = randInt(0,2), a,b,answer,text;
-  if(type===0){ a=randInt(12,89); b=randInt(12,89); answer=a+b; text=a+' + '+b; }
-  else if(type===1){ a=randInt(35,99); b=randInt(11,a-12); answer=a-b; text=a+' − '+b; }
-  else { a=randInt(3,12); b=randInt(3,12); answer=a*b; text=a+' × '+b; }
-  return { text: text, answer: answer };
-}
+function generateMathQuestion(){ var type = randInt(0,2), a,b,answer,text; if(type===0){ a=randInt(12,89); b=randInt(12,89); answer=a+b; text=a+' + '+b; } else if(type===1){ a=randInt(35,99); b=randInt(11,a-12); answer=a-b; text=a+' − '+b; } else { a=randInt(3,12); b=randInt(3,12); answer=a*b; text=a+' × '+b; } return { text: text, answer: answer }; }
 
-/* ---------- DOM ---------- */
-var puzzleModal = document.getElementById('puzzleModal');
-var puzzleEqEl = document.getElementById('puzzleEq');
-var puzzleInputEl = document.getElementById('puzzleInput');
-var puzzleFeedbackEl = document.getElementById('puzzleFeedback');
-var interactPrompt = document.getElementById('interactPrompt');
-var ammoDisplayEl = document.getElementById('ammoDisplay');
-var startScreen = document.getElementById('startScreen');
-var pauseScreen = document.getElementById('pauseScreen');
-var endScreen = document.getElementById('endScreen');
-var endTitle = document.getElementById('endTitle');
-var endSubtitle = document.getElementById('endSubtitle');
-var endStats = document.getElementById('endStats');
-var startBtn = document.getElementById('startBtn');
-var restartBtn = document.getElementById('restartBtn');
-var btnEasy = document.getElementById('btnEasy');
-var btnMedium = document.getElementById('btnMedium');
-var nbCountEl = document.getElementById('nbCount');
-var warningEl = document.getElementById('warning');
-var toastEl = document.getElementById('toast');
-var vignetteEl = document.getElementById('vignette');
-var mapOverlay = document.getElementById('mapOverlay');
-var mapCanvas = document.getElementById('mapCanvas');
-var mapCtx = mapCanvas.getContext('2d');
+/* ============================================================
+ *  DOM 与 UI
+ * ============================================================ */
+var puzzleModal = document.getElementById('puzzleModal'); var puzzleEqEl = document.getElementById('puzzleEq'); var puzzleInputEl = document.getElementById('puzzleInput'); var puzzleFeedbackEl = document.getElementById('puzzleFeedback'); var interactPrompt = document.getElementById('interactPrompt'); var ammoDisplayEl = document.getElementById('ammoDisplay'); var startScreen = document.getElementById('startScreen'); var pauseScreen = document.getElementById('pauseScreen'); var endScreen = document.getElementById('endScreen'); var endTitle = document.getElementById('endTitle'); var endSubtitle = document.getElementById('endSubtitle'); var endStats = document.getElementById('endStats'); var startBtn = document.getElementById('startBtn'); var restartBtn = document.getElementById('restartBtn'); var btnEasy = document.getElementById('btnEasy'); var btnMedium = document.getElementById('btnMedium'); var nbCountEl = document.getElementById('nbCount'); var warningEl = document.getElementById('warning'); var toastEl = document.getElementById('toast'); var vignetteEl = document.getElementById('vignette'); var mapOverlay = document.getElementById('mapOverlay'); var mapCanvas = document.getElementById('mapCanvas'); var mapCtx = mapCanvas.getContext('2d');
 
 function hideAllScreens(){ startScreen.classList.add('hidden'); pauseScreen.classList.add('hidden'); endScreen.classList.add('hidden'); }
 function showScreen(name){ hideAllScreens(); if(name==='start') startScreen.classList.remove('hidden'); if(name==='pause') pauseScreen.classList.remove('hidden'); if(name==='end') endScreen.classList.remove('hidden'); }
 function showToast(text, dur){ toastEl.textContent = text; toastEl.classList.add('show'); Game.toastTimer = dur||2.0; }
 function updateToast(dt){ if(Game.toastTimer>0){ Game.toastTimer -= dt; if(Game.toastTimer<=0) toastEl.classList.remove('show'); } }
 function updateAmmoDisplay(){ ammoDisplayEl.textContent = '🔫 ' + Game.ammo + ' ' + T('hudShots'); ammoDisplayEl.classList.toggle('empty', Game.ammo <= 0); }
-[btnEasy, btnMedium].forEach(function(btn){
-  btn.addEventListener('click', function(){ [btnEasy, btnMedium].forEach(function(b){ b.classList.remove('selected'); }); btn.classList.add('selected'); Game.difficulty = btn.dataset.diff; });
-});
+[btnEasy, btnMedium].forEach(function(btn){ btn.addEventListener('click', function(){ [btnEasy, btnMedium].forEach(function(b){ b.classList.remove('selected'); }); btn.classList.add('selected'); Game.difficulty = btn.dataset.diff; }); });
 
 var MAP_SIZE = 520, MAP_PAD = 22; var explored = [];
 function resetExplored(){ explored = []; for(var z=0;z<MH;z++) explored.push(new Array(MW).fill(false)); }
-function updateExplored(){
-  if(!explored.length) return;
-  var pg = worldToGrid(player.pos.x, player.pos.z), pgx = clamp(pg.gx, 0, MW-1), pgz = clamp(pg.gz, 0, MH-1), R = CONFIG.MAP_VIEW_RADIUS;
-  for(var dz=-R; dz<=R; dz++) for(var dx=-R; dx<=R; dx++){
-    var dist = Math.hypot(dx,dz); if(dist > R) continue;
-    var x = pgx+dx, z = pgz+dz; if(x<0||z<0||x>=MW||z>=MH||explored[z][x]) continue;
-    explored[z][x] = true;
-  }
-}
+function updateExplored(){ if(!explored.length) return; var pg = worldToGrid(player.pos.x, player.pos.z), pgx = clamp(pg.gx, 0, MW-1), pgz = clamp(pg.gz, 0, MH-1), R = CONFIG.MAP_VIEW_RADIUS; for(var dz=-R; dz<=R; dz++) for(var dx=-R; dx<=R; dx++){ var dist = Math.hypot(dx,dz); if(dist > R) continue; var x = pgx+dx, z = pgz+dz; if(x<0||z<0||x>=MW||z>=MH||explored[z][x]) continue; explored[z][x] = true; } }
 var paperTexture = null;
-function generatePaperTexture(){
-  var c = document.createElement('canvas'); c.width = c.height = MAP_SIZE; var g = c.getContext('2d'); var S = MAP_SIZE;
-  var baseGrad = g.createLinearGradient(0,0,S,S); baseGrad.addColorStop(0,'#e3d9b8'); baseGrad.addColorStop(.48,'#d9cfab'); baseGrad.addColorStop(1,'#cdc19b');
-  g.fillStyle = baseGrad; g.fillRect(0,0,S,S);
-  for(var i=0;i<12000;i++){ var a = (Math.random()*0.09).toFixed(3); g.fillStyle = Math.random()<0.5 ? 'rgba(112,94,56,'+a+')' : 'rgba(255,251,233,'+a+')'; g.fillRect(Math.random()*S, Math.random()*S, 1, 1); }
-  var edgeGrad = g.createRadialGradient(S/2,S/2,S*.30,S/2,S/2,S*.80); edgeGrad.addColorStop(0,'rgba(0,0,0,0)'); edgeGrad.addColorStop(1,'rgba(72,54,26,.22)');
-  g.fillStyle = edgeGrad; g.fillRect(0,0,S,S); return c;
-}
+function generatePaperTexture(){ var c = document.createElement('canvas'); c.width = c.height = MAP_SIZE; var g = c.getContext('2d'); var S = MAP_SIZE; var baseGrad = g.createLinearGradient(0,0,S,S); baseGrad.addColorStop(0,'#e3d9b8'); baseGrad.addColorStop(.48,'#d9cfab'); baseGrad.addColorStop(1,'#cdc19b'); g.fillStyle = baseGrad; g.fillRect(0,0,S,S); for(var i=0;i<12000;i++){ var a = (Math.random()*0.09).toFixed(3); g.fillStyle = Math.random()<0.5 ? 'rgba(112,94,56,'+a+')' : 'rgba(255,251,233,'+a+')'; g.fillRect(Math.random()*S, Math.random()*S, 1, 1); } var edgeGrad = g.createRadialGradient(S/2,S/2,S*.30,S/2,S/2,S*.80); edgeGrad.addColorStop(0,'rgba(0,0,0,0)'); edgeGrad.addColorStop(1,'rgba(72,54,26,.22)'); g.fillStyle = edgeGrad; g.fillRect(0,0,S,S); return c; }
 function drawMap(){
   var S = MAP_SIZE, g = mapCtx; if(!paperTexture) paperTexture = generatePaperTexture();
   g.clearRect(0,0,S,S); g.drawImage(paperTexture, 0, 0); var AREA = S - MAP_PAD*2, cw = AREA/MW, ch = AREA/MH;
@@ -960,56 +489,35 @@ function drawMap(){
   g.fillStyle = '#1e7fd6'; g.fill(); g.strokeStyle = 'rgba(240,250,255,.95)'; g.lineWidth = 1.6; g.stroke(); g.restore();
 }
 
-/* ---------- 输入 ---------- */
+/* ============================================================
+ *  输入
+ * ============================================================ */
 var keys = Object.create(null); var pointerLocked = false;
 function requestLock(){ if(!canvas.requestPointerLock) return; try { var p = canvas.requestPointerLock(); if(p && p.catch) p.catch(function(){}); } catch(e){} }
-document.addEventListener('pointerlockchange', function(){
-  pointerLocked = (document.pointerLockElement === canvas);
-  if(pointerLocked){ if(Game.state === 'paused'){ Game.state = 'playing'; hideAllScreens(); } return; }
-  if(Game.state === 'puzzle') return;
-  if(Game.state === 'playing'){ Game.state = 'paused'; Game.mapOpen = false; mapOverlay.classList.remove('open'); showScreen('pause'); }
-});
+document.addEventListener('pointerlockchange', function(){ pointerLocked = (document.pointerLockElement === canvas); if(pointerLocked){ if(Game.state === 'paused'){ Game.state = 'playing'; hideAllScreens(); } return; } if(Game.state === 'puzzle') return; if(Game.state === 'playing'){ Game.state = 'paused'; Game.mapOpen = false; mapOverlay.classList.remove('open'); showScreen('pause'); } });
 document.addEventListener('pointerlockerror', function(){ pointerLocked = false; });
-canvas.addEventListener('mousedown', function(e){
-  if(e.button !== 0) return;
-  if(Game.state === 'playing' && !pointerLocked){ requestLock(); e.preventDefault(); return; }
-  if(Game.state !== 'playing' || !pointerLocked) return;
-  tryShoot();
-});
+canvas.addEventListener('mousedown', function(e){ if(e.button !== 0) return; if(Game.state === 'playing' && !pointerLocked){ requestLock(); e.preventDefault(); return; } if(Game.state !== 'playing' || !pointerLocked) return; tryShoot(); });
 document.addEventListener('keydown', function(e){
-  if(Game.state === 'puzzle'){
-    if(e.key === 'Escape'){ cancelPuzzle(); e.preventDefault(); return; }
-    if(Game.puzzleResolving){ e.preventDefault(); return; }
-    if(e.key >= '0' && e.key <= '9'){ if(Game.puzzleInput.length < 5){ Game.puzzleInput += e.key; puzzleInputEl.textContent = Game.puzzleInput; } e.preventDefault(); }
-    else if(e.key === 'Backspace'){ Game.puzzleInput = Game.puzzleInput.slice(0,-1); puzzleInputEl.textContent = Game.puzzleInput || '_'; e.preventDefault(); }
-    else if(e.key === 'Enter'){ submitPuzzleAnswer(); e.preventDefault(); }
-    return;
-  }
+  if(Game.state === 'puzzle'){ if(e.key === 'Escape'){ cancelPuzzle(); e.preventDefault(); return; } if(Game.puzzleResolving){ e.preventDefault(); return; } if(e.key >= '0' && e.key <= '9'){ if(Game.puzzleInput.length < 5){ Game.puzzleInput += e.key; puzzleInputEl.textContent = Game.puzzleInput; } e.preventDefault(); } else if(e.key === 'Backspace'){ Game.puzzleInput = Game.puzzleInput.slice(0,-1); puzzleInputEl.textContent = Game.puzzleInput || '_'; e.preventDefault(); } else if(e.key === 'Enter'){ submitPuzzleAnswer(); e.preventDefault(); } return; }
   keys[e.code] = true;
   if(e.code === 'KeyM' && Game.state === 'playing' && !Game.mapOpen){ Game.mapOpen = true; mapOverlay.classList.add('open'); SoundFX.mapOpen(); }
   if(e.code === 'KeyE' && Game.state === 'playing' && Game.nearbySafe){ openPuzzle(Game.nearbySafe); }
   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].indexOf(e.code) >= 0) e.preventDefault();
 });
 document.addEventListener('keyup', function(e){ keys[e.code] = false; if(e.code === 'KeyM' && Game.mapOpen){ Game.mapOpen = false; mapOverlay.classList.remove('open'); } });
-document.addEventListener('mousemove', function(e){
-  if(!pointerLocked || Game.state !== 'playing') return;
-  player.yaw -= e.movementX * CONFIG.MOUSE_SENSITIVITY;
-  player.pitch -= e.movementY * CONFIG.MOUSE_SENSITIVITY;
-  player.pitch = clamp(player.pitch, -CONFIG.MAX_PITCH, CONFIG.MAX_PITCH);
-});
+document.addEventListener('mousemove', function(e){ if(!pointerLocked || Game.state !== 'playing') return; player.yaw -= e.movementX * CONFIG.MOUSE_SENSITIVITY; player.pitch -= e.movementY * CONFIG.MOUSE_SENSITIVITY; player.pitch = clamp(player.pitch, -CONFIG.MAX_PITCH, CONFIG.MAX_PITCH); });
 window.addEventListener('resize', function(){ camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
 window.addEventListener('blur', function(){ if(Game.state === 'playing'){ Game.state = 'paused'; Game.mapOpen = false; mapOverlay.classList.remove('open'); showScreen('pause'); } });
 document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
 
-/* ---------- 战斗/交互 ---------- */
+/* ============================================================
+ *  战斗与交互
+ * ============================================================ */
 function tryShoot(){
-  if(Game.shootCooldown > 0) return;
-  if(Game.ammo <= 0){ SoundFX.dryFire(); showToast(T('noAmmo'), 1.0); return; }
+  if(Game.shootCooldown > 0) return; if(Game.ammo <= 0){ SoundFX.dryFire(); showToast(T('noAmmo'), 1.0); return; }
   Game.ammo--; updateAmmoDisplay(); Game.shootCooldown = CONFIG.GUN.COOLDOWN; Game.recoil = 1.0; SoundFX.shoot(); if(muzzleLight) muzzleLight.intensity = 3.5;
   safeEmit('playerShoot', { ammo: Game.ammo });
-
-  var fwdX = -Math.sin(player.yaw), fwdZ = -Math.cos(player.yaw);
-  var hitM = null, hitDist = Infinity, hitP = null, hitPDist = Infinity;
+  var fwdX = -Math.sin(player.yaw), fwdZ = -Math.cos(player.yaw), hitM = null, hitDist = Infinity, hitP = null, hitPDist = Infinity;
   
   monsters.forEach(function(m){
     var mp = m.group.position, dx = mp.x - player.pos.x, dz = mp.z - player.pos.z, dist = Math.hypot(dx, dz);
@@ -1017,72 +525,52 @@ function tryShoot(){
     if((dx*fwdX + dz*fwdZ) / dist < CONFIG.GUN.CONE_DOT) return;
     if(dist < hitDist){ hitDist = dist; hitM = m; }
   });
+  // ★ 修复：互坑距离限制，只有贴得很近才能打晕队友
   for(var id in otherPlayers){
     var p = otherPlayers[id], px = p.mesh.position.x - player.pos.x, pz = p.mesh.position.z - player.pos.z, pdist = Math.hypot(px, pz);
-    if(pdist > CONFIG.GUN.RANGE || pdist < 0.001) return;
+    if(pdist > 8 || pdist < 0.001) continue; // 最大距离缩短为 8
     if((px*fwdX + pz*fwdZ) / pdist > CONFIG.GUN.CONE_DOT && pdist < hitPDist){ hitPDist = pdist; hitP = id; }
   }
-  
-  if(hitP && hitPDist < hitDist){
-    safeEmit('hitPlayer', hitP); showToast("🎯 击中队友！", 1.0); return;
-  }
+  // 如果打中队友，且比怪物近
+  if(hitP && hitPDist < hitDist){ safeEmit('hitPlayer', hitP); showToast("🎯 击中队友！", 1.0); return; }
   if(hitM) hitMonster(hitM);
 }
 function hitMonster(m){
   m.stunTimer = CONFIG.GUN.STUN_DURATION; m.path = []; m.pathIndex = 0;
-  if(Math.random() < CONFIG.GUN.RAGE_CHANCE){
-    m.rageMultiplier = Math.min(CONFIG.GUN.RAGE_MULT_CAP, m.rageMultiplier * CONFIG.GUN.RAGE_SPEED_MULT);
-    SoundFX.rage(); showToast(T('rageToast') + m.rageMultiplier.toFixed(2), 2.4);
-  } else showToast(T('stunToast'), 1.8);
+  if(Math.random() < CONFIG.GUN.RAGE_CHANCE){ m.rageMultiplier = Math.min(CONFIG.GUN.RAGE_MULT_CAP, m.rageMultiplier * CONFIG.GUN.RAGE_SPEED_MULT); SoundFX.rage(); showToast(T('rageToast') + m.rageMultiplier.toFixed(2), 2.4); }
+  else showToast(T('stunToast'), 1.8);
   safeEmit('hitMonster', {});
 }
-function updateSafes(dt){
-  Game.nearbySafe = null; var bestDist = CONFIG.GUN.SAFE_INTERACT;
-  for(var i=0;i<safes.length;i++){ var s = safes[i]; if(s.opened) continue; var dx = s.group.position.x - player.pos.x, dz = s.group.position.z - player.pos.z, d = Math.hypot(dx, dz); if(d < bestDist){ bestDist = d; Game.nearbySafe = s; } }
-  interactPrompt.style.opacity = Game.nearbySafe ? '1' : '0';
-}
-function openPuzzle(safe){
-  if(!safe || safe.opened || Game.state !== 'playing') return;
-  Game.currentSafe = safe; Game.puzzleInput = ''; Game.puzzleResolving = false; Game.puzzleQuestion = generateMathQuestion();
-  puzzleEqEl.textContent = Game.puzzleQuestion.text + ' = ?'; puzzleInputEl.textContent = '_'; puzzleFeedbackEl.textContent = '';
-  interactPrompt.style.opacity = '0'; puzzleModal.classList.add('open'); Game.state = 'puzzle';
-  if(document.pointerLockElement === canvas) document.exitPointerLock();
-}
+function updateSafes(dt){ Game.nearbySafe = null; var bestDist = CONFIG.GUN.SAFE_INTERACT; for(var i=0;i<safes.length;i++){ var s = safes[i]; if(s.opened) continue; var dx = s.group.position.x - player.pos.x, dz = s.group.position.z - player.pos.z, d = Math.hypot(dx, dz); if(d < bestDist){ bestDist = d; Game.nearbySafe = s; } } interactPrompt.style.opacity = Game.nearbySafe ? '1' : '0'; }
+function openPuzzle(safe){ if(!safe || safe.opened || Game.state !== 'playing') return; Game.currentSafe = safe; Game.puzzleInput = ''; Game.puzzleResolving = false; Game.puzzleQuestion = generateMathQuestion(); puzzleEqEl.textContent = Game.puzzleQuestion.text + ' = ?'; puzzleInputEl.textContent = '_'; puzzleFeedbackEl.textContent = ''; interactPrompt.style.opacity = '0'; puzzleModal.classList.add('open'); Game.state = 'puzzle'; if(document.pointerLockElement === canvas) document.exitPointerLock(); }
 function cancelPuzzle(){ puzzleModal.classList.remove('open'); Game.state = 'paused'; Game.currentSafe = null; Game.puzzleQuestion = null; showScreen('pause'); }
 function submitPuzzleAnswer(){
   if(!Game.puzzleQuestion || !Game.currentSafe) return;
   var val = parseInt(Game.puzzleInput, 10);
   if(val === Game.puzzleQuestion.answer){
-    Game.puzzleResolving = true; puzzleFeedbackEl.textContent = T('safeRight'); puzzleFeedbackEl.style.color = '#8fe07a';
-    SoundFX.safeOpen(); var safe = Game.currentSafe; safe.opened = true;
+    Game.puzzleResolving = true; puzzleFeedbackEl.textContent = T('safeRight'); puzzleFeedbackEl.style.color = '#8fe07a'; SoundFX.safeOpen(); var safe = Game.currentSafe; safe.opened = true;
     Game.ammo += CONFIG.GUN.AMMO_PER_SAFE; updateAmmoDisplay(); showToast(T('safeGet') + CONFIG.GUN.AMMO_PER_SAFE + T('safeShells'), 2.0);
     requestLock(); setTimeout(function(){ puzzleModal.classList.remove('open'); Game.currentSafe = null; Game.puzzleQuestion = null; Game.puzzleResolving = false; if(pointerLocked){ Game.state = 'playing'; hideAllScreens(); } else { Game.state = 'paused'; showScreen('pause'); } }, 700);
   } else {
-    puzzleFeedbackEl.textContent = T('safeWrong'); puzzleFeedbackEl.style.color = '#ff5555'; SoundFX.wrongAnswer();
-    Game.puzzleInput = ''; puzzleInputEl.textContent = '_';
+    puzzleFeedbackEl.textContent = T('safeWrong'); puzzleFeedbackEl.style.color = '#ff5555'; SoundFX.wrongAnswer(); Game.puzzleInput = ''; puzzleInputEl.textContent = '_';
     setTimeout(function(){ if(Game.state !== 'puzzle') return; Game.puzzleQuestion = generateMathQuestion(); puzzleEqEl.textContent = Game.puzzleQuestion.text + ' = ?'; puzzleFeedbackEl.textContent = ''; }, 800);
   }
 }
 
-/* ---------- 更新循环 ---------- */
+/* ============================================================
+ *  更新循环
+ * ============================================================ */
 function updatePlayer(dt){
-  if(Game.isStunned){
-    Game.stunTimer -= dt;
-    if(Game.stunTimer <= 0){ Game.isStunned = false; document.getElementById('stunOverlay').style.opacity = '0'; }
-    return;
-  }
-  Game.battery -= dt * 1.5; if(Game.battery <= 0) Game.battery = 0;
+  if(Game.isStunned){ Game.stunTimer -= dt; if(Game.stunTimer <= 0){ Game.isStunned = false; document.getElementById('stunOverlay').style.opacity = '0'; } return; }
+  // ★ 修复：电量消耗速度大幅降低（原来 1.5，现在 0.6/秒）
+  Game.battery -= dt * 0.6; if(Game.battery <= 0) Game.battery = 0;
   var bar = document.getElementById('batteryBar');
-  if(bar){
-    bar.style.width = Game.battery + '%';
-    if(Game.battery < 20) bar.style.background = '#ff3333'; else if(Game.battery < 50) bar.style.background = '#ffcc00'; else bar.style.background = '#00ffcc';
-  }
+  if(bar){ bar.style.width = Game.battery + '%'; if(Game.battery < 20) bar.style.background = '#ff3333'; else if(Game.battery < 50) bar.style.background = '#ffcc00'; else bar.style.background = '#00ffcc'; }
 
   var sprinting = (keys['ShiftLeft'] || keys['ShiftRight']) && !Game.mapOpen;
   var speed = sprinting ? CONFIG.PLAYER_SPRINT : CONFIG.PLAYER_SPEED; if(Game.mapOpen) speed *= 0.42;
   var forward=0, strafe=0;
-  if(keys['KeyW']||keys['ArrowUp']) forward += 1; if(keys['KeyS']||keys['ArrowDown']) forward -= 1;
-  if(keys['KeyA']||keys['ArrowLeft']) strafe -= 1; if(keys['KeyD']||keys['ArrowRight']) strafe += 1;
+  if(keys['KeyW']||keys['ArrowUp']) forward += 1; if(keys['KeyS']||keys['ArrowDown']) forward -= 1; if(keys['KeyA']||keys['ArrowLeft']) strafe -= 1; if(keys['KeyD']||keys['ArrowRight']) strafe += 1;
   var len = Math.hypot(forward, strafe); if(len > 0){ forward/=len; strafe/=len; }
   var sinY = Math.sin(player.yaw), cosY = Math.cos(player.yaw);
   var moveX = (-sinY*forward + cosY*strafe) * speed * dt, moveZ = (-cosY*forward - sinY*strafe) * speed * dt;
@@ -1092,68 +580,49 @@ function updatePlayer(dt){
   var bobY = Math.sin(Game.time*10) * 0.05, bobX = Math.cos(Game.time*10) * 0.03;
   camera.position.set(player.pos.x + bobX*cosY, CONFIG.EYE_HEIGHT + bobY, player.pos.z - bobX*sinY);
   camera.rotation.y = player.yaw; camera.rotation.x = player.pitch;
-
-  var batteryFactor = 0.2 + (Game.battery / 100) * 0.8;
-  playerLight.position.set(player.pos.x, CONFIG.EYE_HEIGHT + 0.4 + bobY, player.pos.z);
-  playerLight.intensity = 1.5 * batteryFactor;
   if(Game.shootCooldown > 0) Game.shootCooldown -= dt;
 }
 function updateMonsters(dt){
   monsters.forEach(function(m){
     var mp = m.group.position, ud = m.group.userData;
-    if(m.stunTimer > 0){
-      m.stunTimer -= dt; if(ud.stunRing) ud.stunRing.visible = true; m.group.rotation.z = Math.sin(Game.time*12) * 0.12; m.group.position.y = 0;
-      if(m.stunTimer <= 0){ m.stunTimer = 0; if(ud.stunRing) ud.stunRing.visible = false; m.group.rotation.z = 0; }
-      return;
-    }
-    m.repathTimer -= dt;
-    if(m.repathTimer <= 0){
-      m.repathTimer = CONFIG.MONSTER_REPATH;
-      var mg = worldToGrid(mp.x, mp.z), pg = worldToGrid(player.pos.x, player.pos.z);
-      m.path = bfsPath(mg.gx, mg.gz, pg.gx, pg.gz).map(function(p){ return gridToWorld(p.gx, p.gz); }); m.pathIndex = 0;
-    }
+    if(m.stunTimer > 0){ m.stunTimer -= dt; if(ud.stunRing) ud.stunRing.visible = true; m.group.rotation.z = Math.sin(Game.time*12) * 0.12; m.group.position.y = 0; if(m.stunTimer <= 0){ m.stunTimer = 0; if(ud.stunRing) ud.stunRing.visible = false; m.group.rotation.z = 0; } return; }
+    m.repathTimer -= dt; if(m.repathTimer <= 0){ m.repathTimer = CONFIG.MONSTER_REPATH; var mg = worldToGrid(mp.x, mp.z), pg = worldToGrid(player.pos.x, player.pos.z); m.path = bfsPath(mg.gx, mg.gz, pg.gx, pg.gz).map(function(p){ return gridToWorld(p.gx, p.gz); }); m.pathIndex = 0; }
     var speed = CONFIG.MONSTER_BASE_SPEED * m.rageMultiplier, movedDist = 0;
-    if(m.path && m.pathIndex < m.path.length){
-      var target = m.path[m.pathIndex], dx = target.x - mp.x, dz = target.z - mp.z, dist = Math.hypot(dx, dz);
-      if(dist < 0.34) m.pathIndex++; else {
-        var step = Math.min(speed * dt, dist); mp.x += (dx/dist) * step; mp.z += (dz/dist) * step; movedDist += step;
-        var targetYaw = Math.atan2(dx, dz); m.facing = lerpAngle(m.facing, targetYaw, Math.min(1, dt*6)); m.group.rotation.y = m.facing;
-      }
-    }
-    var swing = Math.sin(Game.time*5) * 0.42;
-    if(ud.legL) ud.legL.rotation.x = swing; if(ud.legR) ud.legR.rotation.x = -swing;
-    m.group.position.y = Math.abs(Math.sin(Game.time*5)) * 0.055;
-
-    var distToPlayer = Math.hypot(mp.x - player.pos.x, mp.z - player.pos.z);
-    if(distToPlayer < CONFIG.MONSTER_CATCH_DIST && !Game.isStunned) onPlayerCaught();
+    if(m.path && m.pathIndex < m.path.length){ var target = m.path[m.pathIndex], dx = target.x - mp.x, dz = target.z - mp.z, dist = Math.hypot(dx, dz); if(dist < 0.34) m.pathIndex++; else { var step = Math.min(speed * dt, dist); mp.x += (dx/dist) * step; mp.z += (dz/dist) * step; movedDist += step; var targetYaw = Math.atan2(dx, dz); m.facing = lerpAngle(m.facing, targetYaw, Math.min(1, dt*6)); m.group.rotation.y = m.facing; } }
+    var swing = Math.sin(Game.time*5) * 0.42; if(ud.legL) ud.legL.rotation.x = swing; if(ud.legR) ud.legR.rotation.x = -swing; m.group.position.y = Math.abs(Math.sin(Game.time*5)) * 0.055;
+    var distToPlayer = Math.hypot(mp.x - player.pos.x, mp.z - player.pos.z); if(distToPlayer < CONFIG.MONSTER_CATCH_DIST && !Game.isStunned) onPlayerCaught();
   });
 }
-function updateNotebooks(dt){
-  for(var i=0;i<notebooks.length;i++){
-    var nb = notebooks[i]; if(nb.collected) continue;
-    nb.mesh.rotation.y += dt * 1.6; nb.mesh.position.y = 1.25 + Math.sin(Game.time*2 + i)*0.16;
-    if(Math.hypot(nb.mesh.position.x - player.pos.x, nb.mesh.position.z - player.pos.z) < CONFIG.NOTEBOOK_PICK_DIST) collectNotebook(nb);
-  }
-}
-function collectNotebook(nb){
-  nb.collected = true; scene.remove(nb.mesh); Game.notebooksFound++; nbCountEl.textContent = String(Game.notebooksFound);
-  SoundFX.pickup(); showToast(T('collectToast') + ' (' + Game.notebooksFound + '/' + Game.notebooksTotal + ')', 1.6);
-  safeEmit('collectNotebook', nb.index); if(Game.notebooksFound >= Game.notebooksTotal) onPlayerWin();
-}
+function updateNotebooks(dt){ for(var i=0;i<notebooks.length;i++){ var nb = notebooks[i]; if(nb.collected) continue; nb.mesh.rotation.y += dt * 1.6; nb.mesh.position.y = 1.25 + Math.sin(Game.time*2 + i)*0.16; if(Math.hypot(nb.mesh.position.x - player.pos.x, nb.mesh.position.z - player.pos.z) < CONFIG.NOTEBOOK_PICK_DIST) collectNotebook(nb); } }
+function collectNotebook(nb){ nb.collected = true; scene.remove(nb.mesh); Game.notebooksFound++; nbCountEl.textContent = String(Game.notebooksFound); SoundFX.pickup(); showToast(T('collectToast') + ' (' + Game.notebooksFound + '/' + Game.notebooksTotal + ')', 1.6); safeEmit('collectNotebook', nb.index); if(Game.notebooksFound >= Game.notebooksTotal) onPlayerWin(); }
 function onPlayerCaught(){ Game.state = 'gameover'; SoundFX.caught(); if(document.pointerLockElement === canvas) document.exitPointerLock(); endTitle.textContent = T('loseTitle'); endTitle.className = 'lose'; endStats.innerHTML = T('endStats1') + Game.notebooksFound + '/' + Game.notebooksTotal + '<br>' + T('endStats2') + formatTime(Game.time); showScreen('end'); }
 function onPlayerWin(){ Game.state = 'win'; SoundFX.victory(); if(document.pointerLockElement === canvas) document.exitPointerLock(); endTitle.textContent = T('winTitle'); endTitle.className = 'win'; endStats.innerHTML = T('endStats1') + Game.notebooksFound + '/' + Game.notebooksTotal + '<br>' + T('endStats2') + formatTime(Game.time); showScreen('end'); }
 function updateHUD(dt){ vignetteEl.style.boxShadow = 'inset 0 0 ' + (120 + Math.floor(Game.dangerLevel*170)) + 'px rgba(180,0,0,' + (Game.dangerLevel*0.65).toFixed(3) + ')'; updateToast(dt); }
 
+// ★ 修复：环境光随电量变暗，恐怖感瞬间拉满
+function updateEnvironment(dt){
+  var t = Game.time * 0.25; fillLight.position.set(Math.sin(t)*18, 3.4, Math.cos(t*0.8)*18);
+  var batteryFactor = 0.2 + (Game.battery / 100) * 0.8;
+  if(Game.state === 'menu'){
+    ambientLight.intensity = 1.55; hemiLight.intensity = 1.10; playerLight.intensity = 1.9;
+  } else if(Game.state === 'playing'){
+    ambientLight.intensity = (1.05 + Math.sin(Game.time*1.3)*0.06) * batteryFactor;
+    hemiLight.intensity = 0.75 * batteryFactor;
+    var flicker = 1.0 + Math.sin(Game.time*17.3)*0.04 + Math.sin(Game.time*7.1)*0.03;
+    playerLight.intensity = 1.5 * batteryFactor * flicker;
+    playerLight.position.set(player.pos.x, CONFIG.EYE_HEIGHT + 0.4, player.pos.z);
+  } else {
+    ambientLight.intensity = 1.05; hemiLight.intensity = 0.75; playerLight.intensity = 1.5;
+  }
+}
+
 var clock = null;
 function startGame(){
   Game.state = 'playing'; Game.time = 0; Game.notebooksFound = 0; Game.mapOpen = false; Game.ammo = 0; Game.battery = 100; Game.isStunned = false;
-  puzzleModal.classList.remove('open'); mapOverlay.classList.remove('open'); toastEl.classList.remove('show');
-  document.getElementById('stunOverlay').style.opacity = '0';
-
+  puzzleModal.classList.remove('open'); mapOverlay.classList.remove('open'); toastEl.classList.remove('show'); document.getElementById('stunOverlay').style.opacity = '0';
   generateMaze(); buildMazeMeshes(); resetExplored(); spawnPlayer(); updateExplored(); spawnNotebooks(); spawnBatteries(); spawnSafes(); spawnMonsters();
   camera.position.set(player.pos.x, CONFIG.EYE_HEIGHT, player.pos.z); camera.rotation.set(0, player.yaw, 0);
-  updateAmmoDisplay();
-  if(Game.online && socket && socket.connected){ safeEmit('joinRoom', { code: roomInput.value.toUpperCase().trim() || 'PUBLIC', name: 'Player' }); }
+  updateAmmoDisplay(); safeEmit('joinRoom', { code: roomInput.value.toUpperCase().trim() || 'PUBLIC', name: 'Player' });
   SoundFX.startDrone(); nbCountEl.textContent = '0'; if(!clock) clock = new THREE.Clock(); clock.getDelta();
   hideAllScreens(); showToast(Game.online ? T('startToast') : T('startToastSingle'), 2.4);
 }
@@ -1162,23 +631,13 @@ restartBtn.addEventListener('click', function(){ SoundFX.resume(); requestLock()
 pauseScreen.addEventListener('click', function(){ SoundFX.resume(); requestLock(); Game.state = 'playing'; hideAllScreens(); });
 
 function animate(){
-  requestAnimationFrame(animate);
-  if(!clock) clock = new THREE.Clock();
-  var dt = Math.min(clock.getDelta(), 0.05);
-
-  if(Game.state === 'playing'){
-    Game.time += dt;
-    updatePlayer(dt); updateExplored(); updateMonsters(dt); updateNotebooks(dt); updateBatteries(dt); updateSafes(dt); updateHUD(dt);
-    if(!window.lastNetworkSend) window.lastNetworkSend = 0; window.lastNetworkSend += dt;
-    if(window.lastNetworkSend > 0.05){ safeEmit('playerMove', { x: player.pos.x, z: player.pos.z, yaw: player.yaw }); window.lastNetworkSend = 0; }
-  } else if(Game.state === 'menu'){
-    Game.time += dt; player.yaw += dt * 0.28;
-    camera.position.set(player.pos.x, CONFIG.EYE_HEIGHT + 0.85, player.pos.z); camera.rotation.y = player.yaw; camera.rotation.x = -0.16;
-  } else Game.time += dt;
+  requestAnimationFrame(animate); if(!clock) clock = new THREE.Clock(); var dt = Math.min(clock.getDelta(), 0.05);
+  if(Game.state === 'playing'){ Game.time += dt; updatePlayer(dt); updateExplored(); updateMonsters(dt); updateNotebooks(dt); updateBatteries(dt); updateSafes(dt); updateHUD(dt); updateEnvironment(dt); if(!window.lastNetworkSend) window.lastNetworkSend = 0; window.lastNetworkSend += dt; if(window.lastNetworkSend > 0.05){ safeEmit('playerMove', { x: player.pos.x, z: player.pos.z, yaw: player.yaw }); window.lastNetworkSend = 0; } }
+  else if(Game.state === 'menu'){ Game.time += dt; player.yaw += dt * 0.28; camera.position.set(player.pos.x, CONFIG.EYE_HEIGHT + 0.85, player.pos.z); camera.rotation.y = player.yaw; camera.rotation.x = -0.16; updateEnvironment(dt); }
+  else Game.time += dt;
 
   Object.keys(otherPlayers).forEach(function(id){ var p = otherPlayers[id]; p.mesh.position.lerp(p.targetPos, 0.2); p.mesh.rotation.y += (p.targetYaw - p.mesh.rotation.y) * 0.2; });
-  updateGunTransform(dt); renderer.render(scene, camera);
-  if(Game.mapOpen && Game.state === 'playing') drawMap();
+  updateGunTransform(dt); renderer.render(scene, camera); if(Game.mapOpen && Game.state === 'playing') drawMap();
 }
 
 function boot(){
