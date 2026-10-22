@@ -45,6 +45,19 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
 #puzzleInput{display:inline-block;min-width:200px;padding:8px 24px;font-size:32px;font-weight:bold;color:#8fe07a;letter-spacing:6px;background:rgba(0,0,0,.5);border:2px solid #4a6a3a;border-radius:4px;margin-bottom:14px;min-height:52px;line-height:44px}
 #puzzleFeedback{font-size:16px;letter-spacing:3px;height:24px;margin-bottom:16px;font-weight:bold}
 #puzzleHint{font-size:12px;color:#5a6a5a;letter-spacing:2px}
+
+/* 管理员系统弹窗 */
+#adminModal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);z-index:55;opacity:0;pointer-events:none;transition:opacity .2s}
+#adminModal.open{opacity:1;pointer-events:auto}
+#adminBox{padding:36px 60px 30px;background:linear-gradient(180deg,#0a1a10,#000);border:3px solid #00ffcc;border-radius:6px;box-shadow:0 0 50px rgba(0,255,204,0.3);text-align:center;min-width:460px}
+#adminTitle{font-size:22px;letter-spacing:10px;color:#00ffcc;margin-bottom:4px;font-weight:bold;text-shadow:0 0 10px rgba(0,255,204,0.5)}
+#adminSubtitle{font-size:12px;letter-spacing:6px;color:#2a8a70;margin-bottom:26px}
+#adminInput{display:inline-block;min-width:200px;padding:8px 24px;font-size:24px;font-weight:bold;color:#00ffcc;letter-spacing:6px;background:rgba(0,255,204,0.1);border:2px solid #00ffcc;border-radius:4px;margin-bottom:14px;min-height:52px;line-height:44px;text-align:center}
+#adminFeedback{font-size:16px;letter-spacing:3px;height:24px;margin-bottom:16px;font-weight:bold}
+#adminHint{font-size:12px;color:#2a8a70;letter-spacing:2px}
+.btnAdmin{margin-top:20px;padding:10px 30px;background:#00ffcc;color:#000;border:none;border-radius:4px;font-weight:bold;cursor:pointer;font-size:16px;letter-spacing:2px}
+.btnAdmin:hover{background:#88ffdd}
+
 .screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:30;background:radial-gradient(circle at 50% 40%,rgba(20,50,35,.4),rgba(0,0,0,.93) 75%),#050a06;text-align:center;padding:20px}
 .screen.hidden{display:none}
 .screen h1{font-size:62px;letter-spacing:10px;color:#c9f0a8;text-shadow:0 0 12px rgba(120,255,140,.8),0 0 40px rgba(80,200,90,.5);margin-bottom:6px}
@@ -103,6 +116,18 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
     <div id="puzzleHint">Numbers · Enter to submit · ESC to cancel</div>
   </div>
 </div>
+
+<!-- ★ 管理员密码弹窗 -->
+<div id="adminModal">
+  <div id="adminBox">
+    <div id="adminTitle">SYSTEM ACCESS</div>
+    <div id="adminSubtitle">DEVELOPER CONSOLE</div>
+    <div id="adminInput">_</div>
+    <div id="adminFeedback"></div>
+    <div id="adminHint">Enter password · ESC to cancel</div>
+  </div>
+</div>
+
 <div id="startScreen" class="screen">
   <h1>MAZE CHASE</h1>
   <h2 id="startSubtitle">MAZE CHASE</h2>
@@ -126,7 +151,6 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
   </div>
   <p style="margin-top:18px;font-size:14px;color:#7fc98f;letter-spacing:3px" id="roomLabel">— ONLINE ROOM —</p>
   <div id="roomBox">
-    <!-- 这里的 maxlength 改成了 30 -->
     <input id="roomInput" maxlength="30" placeholder="ROOM CODE" value="">
     <button id="roomRandom">🎲 Random</button>
   </div>
@@ -211,7 +235,10 @@ var Game = {
   puzzleInput: '', puzzleQuestion: null, puzzleResolving: false,
   difficulty: 'easy', online: false,
   battery: 100, isStunned: false, stunTimer: 0, playerCount: 1,
-  isEasterEgg: false // 彩蛋标志
+  isEasterEgg: false,
+  isAdmin: false,           // ★ 管理员状态
+  adminInput: '',           // ★ 管理员密码输入
+  currentAdmin: null        // ★ 当前靠近的控制台
 };
 
 /* ============================================================
@@ -234,6 +261,7 @@ var SoundFX = {
   safeOpen:function(){ var s=this; this.tone(440,.12,'triangle',.08); setTimeout(function(){s.tone(660,.12,'triangle',.08);},90); setTimeout(function(){s.tone(880,.25,'triangle',.09);},180); },
   wrongAnswer:function(){ var s=this; this.tone(220,.16,'square',.09); setTimeout(function(){s.tone(160,.22,'square',.08);},100); },
   rage:function(){ this.tone(60,.9,'sawtooth',.16,25); this.tone(180,.6,'square',.09,70); },
+  adminSuccess:function(){ this.tone(880,.1,'sine',.1); setTimeout(()=>this.tone(1108,.1,'sine',.1),100); setTimeout(()=>this.tone(1318,.2,'sine',.1),200); },
   startDrone:function(){ if(!this.enabled||!this.ctx||this.drone) return; var t=this.ctx.currentTime; var o1=this.ctx.createOscillator(); o1.type='sawtooth'; o1.frequency.value=52; var o2=this.ctx.createOscillator(); o2.type='sawtooth'; o2.frequency.value=52.9; var f=this.ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=190; f.Q.value=4; var g=this.ctx.createGain(); g.gain.setValueAtTime(.0001,t); o1.connect(f); o2.connect(f); f.connect(g); g.connect(this.master); o1.start(t); o2.start(t); this.drone={o1:o1,o2:o2,filt:f}; this.droneGain=g; },
   setDroneLevel:function(v){ if(!this.droneGain||!this.ctx) return; var t=this.ctx.currentTime; this.droneGain.gain.setTargetAtTime(Math.max(.0001,v),t,.25); if(this.drone) this.drone.filt.frequency.setTargetAtTime(160+v*900,t,.3); }
 };
@@ -245,7 +273,6 @@ var grid = [];
 function generateMaze(){
   grid = [];
   if (Game.isEasterEgg) {
-    // 彩蛋房间：只有四面边界墙，中间全空
     for(var z=0;z<MH;z++) {
       var row = [];
       for(var x=0;x<MW;x++) {
@@ -256,7 +283,6 @@ function generateMaze(){
     }
     return;
   }
-
   for(var z=0;z<MH;z++) grid.push(new Array(MW).fill(1)); var stack=[[1,1]]; grid[1][1]=0; var DIRS=[[0,-2],[0,2],[-2,0],[2,0]];
   while(stack.length>0){ var cur=stack[stack.length-1]; var cx=cur[0], cz=cur[1]; var dirs=shuffle(DIRS.slice()); var carved=false; for(var i=0;i<dirs.length;i++){ var dx=dirs[i][0], dz=dirs[i][1]; var nx=cx+dx, nz=cz+dz; if(nx>0&&nz>0&&nx<MW-1&&nz<MH-1&&grid[nz][nx]===1){ grid[nz][nx]=0; grid[cz+dz/2][cx+dx/2]=0; stack.push([nx,nz]); carved=true; break; } } if(!carved) stack.pop(); }
   var extra=Math.floor(MW*MH*0.06), guard=0; while(extra>0&&guard<5000){ guard++; var x=randInt(1,MW-2), z=randInt(1,MH-2); if(grid[z][x]!==1) continue; var horiz=grid[z][x-1]===0&&grid[z][x+1]===0; var vert =grid[z-1][x]===0&&grid[z+1][x]===0; if(horiz!==vert){ grid[z][x]=0; extra--; } }
@@ -291,7 +317,6 @@ var camera = new THREE.PerspectiveCamera(76, window.innerWidth/window.innerHeigh
 var ambientLight = new THREE.AmbientLight(0x303530, 0.4); scene.add(ambientLight);
 var hemiLight = new THREE.HemisphereLight(0x404840, 0x101010, 0.3); scene.add(hemiLight);
 
-// 手电筒
 var flashlight = new THREE.SpotLight(0xffe9b0, 3.0, 22, Math.PI/5, 0.4, 1.5);
 flashlight.position.set(0, 0, 0);
 flashlight.target.position.set(0, 0, -1);
@@ -339,7 +364,6 @@ function randomRoomCode(){ var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; var s
 if(roomRandom) roomRandom.addEventListener('click', function(){ if(roomInput) roomInput.value = randomRoomCode(); });
 if(roomInput) roomInput.value = randomRoomCode();
 
-// 好友模型：自带微光
 function addOtherPlayer(data){
   if(!data || !data.id || otherPlayers[data.id]) return;
   var group = new THREE.Group();
@@ -449,7 +473,7 @@ function createMonsterMesh(){
 }
 function spawnMonsters(){
   monsters.forEach(function(m){ scene.remove(m.group); }); monsters.length = 0;
-  if (Game.isEasterEgg) return; // 彩蛋房间里没有怪物
+  if (Game.isEasterEgg) return; 
   
   var count = (Game.difficulty === 'medium') ? 2 : 1; var open = getOpenCells(); var spawnPoints = [];
   for(var i=0;i<count;i++){ var best = null, bestDist = -1; for(var j=0;j<open.length;j++){ var c = open[j], wp = gridToWorld(c.gx, c.gz); var minDist = wp.distanceTo(player.pos); for(var k=0;k<spawnPoints.length;k++){ var d = wp.distanceTo(spawnPoints[k]); if(d < minDist) minDist = d; } if(minDist > bestDist){ bestDist = minDist; best = c; } } if(best) spawnPoints.push(gridToWorld(best.gx, best.gz)); }
@@ -458,13 +482,25 @@ function spawnMonsters(){
 
 var notebooks = []; var notebookTex = null;
 function createNotebookMesh(){ var group = new THREE.Group(); var body = new THREE.Mesh(new THREE.BoxGeometry(0.62,0.82,0.14), new THREE.MeshLambertMaterial({ map: notebookTex, emissive:0x554400, emissiveIntensity:0.7 })); group.add(body); var light = new THREE.PointLight(0xffcc55, 1.0, 8, 2); group.add(light); return group; }
+
+function createAdminConsoleMesh(){
+  var group = new THREE.Group();
+  var base = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 0.8), new THREE.MeshLambertMaterial({ color: 0x1a1a1a }));
+  base.position.y = 0.4; group.add(base);
+  var screen = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.6, 0.1), new THREE.MeshBasicMaterial({ color: 0x00ffcc }));
+  screen.position.set(0, 0.6, 0.4); group.add(screen);
+  var glow = new THREE.PointLight(0x00ffcc, 2.0, 8); glow.position.set(0, 0.6, 0.8); group.add(glow);
+  return group;
+}
+
 function spawnNotebooks(){
   notebooks.forEach(function(nb){ scene.remove(nb.mesh); }); notebooks.length = 0; if(!notebookTex) notebookTex = makeNotebookTexture();
   
   if (Game.isEasterEgg) {
+    // ★ 彩蛋房间里放主控台
     var c = { gx: Math.floor(MW/2), gz: Math.floor(MH/2) };
-    var mesh = createNotebookMesh();
-    mesh.position.set(OFF_X + (c.gx+0.5)*CELL, 1.25, OFF_Z + (c.gz+0.5)*CELL);
+    var mesh = createAdminConsoleMesh();
+    mesh.position.set(OFF_X + (c.gx+0.5)*CELL, 0, OFF_Z + (c.gz+0.5)*CELL);
     scene.add(mesh);
     notebooks.push({ mesh: mesh, gx:c.gx, gz:c.gz, collected:false, phase:0, index:0 });
     Game.notebooksTotal = 1; Game.notebooksFound = 0;
@@ -481,8 +517,7 @@ function spawnNotebooks(){
 var batteries = [];
 function spawnBatteries(){
   batteries.forEach(function(b){ scene.remove(b.mesh); }); batteries.length = 0;
-  if (Game.isEasterEgg) return; // 彩蛋房间不需要电池
-  
+  if (Game.isEasterEgg) return; 
   var open = getOpenCells();
   for(var i=0; i<15; i++){
     var c = open[randInt(0, open.length-1)]; var wp = gridToWorld(c.gx, c.gz);
@@ -506,8 +541,7 @@ var safes = [];
 function createSafeMesh(){ var g = new THREE.Group(); var body = new THREE.Mesh(new THREE.BoxGeometry(1.10,0.90,0.80), new THREE.MeshLambertMaterial({ color: 0x5a5a62 })); body.position.y = 0.55; g.add(body); var dial = new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,0.06,16), new THREE.MeshLambertMaterial({ color: 0xd8b858, emissive:0x553300 })); dial.rotation.x = Math.PI/2; dial.position.set(-0.22,0.55,0.50); g.add(dial); var lightMesh = new THREE.Mesh(new THREE.SphereGeometry(0.055,8,8), new THREE.MeshBasicMaterial({ color: 0xffdd66 })); lightMesh.position.set(0,1.10,0.42); g.add(lightMesh); g.userData = { lightMesh: lightMesh }; return g; }
 function spawnSafes(){
   safes.forEach(function(s){ scene.remove(s.group); }); safes.length = 0; 
-  if (Game.isEasterEgg) return; // 彩蛋房间没有保险箱
-  
+  if (Game.isEasterEgg) return; 
   var noteSet = {}; notebooks.forEach(function(nb){ noteSet[nb.gx+','+nb.gz] = true; });
   var open = getOpenCells(); var candidates = [];
   for(var i=0;i<open.length;i++){ var c = open[i]; if(noteSet[c.gx+','+c.gz]) continue; var wp = gridToWorld(c.gx,c.gz); if(wp.distanceTo(player.pos) > CELL*4) candidates.push({gx:c.gx,gz:c.gz,wp:wp}); }
@@ -521,11 +555,16 @@ function generateMathQuestion(){ var type = randInt(0,2), a,b,answer,text; if(ty
  * ============================================================ */
 var puzzleModal = document.getElementById('puzzleModal'); var puzzleEqEl = document.getElementById('puzzleEq'); var puzzleInputEl = document.getElementById('puzzleInput'); var puzzleFeedbackEl = document.getElementById('puzzleFeedback'); var interactPrompt = document.getElementById('interactPrompt'); var ammoDisplayEl = document.getElementById('ammoDisplay'); var startScreen = document.getElementById('startScreen'); var pauseScreen = document.getElementById('pauseScreen'); var endScreen = document.getElementById('endScreen'); var endTitle = document.getElementById('endTitle'); var endSubtitle = document.getElementById('endSubtitle'); var endStats = document.getElementById('endStats'); var startBtn = document.getElementById('startBtn'); var restartBtn = document.getElementById('restartBtn'); var btnEasy = document.getElementById('btnEasy'); var btnMedium = document.getElementById('btnMedium'); var nbCountEl = document.getElementById('nbCount'); var warningEl = document.getElementById('warning'); var toastEl = document.getElementById('toast'); var vignetteEl = document.getElementById('vignette'); var mapOverlay = document.getElementById('mapOverlay'); var mapCanvas = document.getElementById('mapCanvas'); var mapCtx = mapCanvas.getContext('2d');
 
+// Admin 弹窗
+var adminModal = document.getElementById('adminModal');
+var adminInputEl = document.getElementById('adminInput');
+var adminFeedbackEl = document.getElementById('adminFeedback');
+
 function hideAllScreens(){ startScreen.classList.add('hidden'); pauseScreen.classList.add('hidden'); endScreen.classList.add('hidden'); }
 function showScreen(name){ hideAllScreens(); if(name==='start') startScreen.classList.remove('hidden'); if(name==='pause') pauseScreen.classList.remove('hidden'); if(name==='end') endScreen.classList.remove('hidden'); }
 function showToast(text, dur){ toastEl.textContent = text; toastEl.classList.add('show'); Game.toastTimer = dur||2.0; }
 function updateToast(dt){ if(Game.toastTimer>0){ Game.toastTimer -= dt; if(Game.toastTimer<=0) toastEl.classList.remove('show'); } }
-function updateAmmoDisplay(){ ammoDisplayEl.textContent = '🔫 ' + Game.ammo + ' ' + T('hudShots'); ammoDisplayEl.classList.toggle('empty', Game.ammo <= 0); }
+function updateAmmoDisplay(){ ammoDisplayEl.textContent = '🔫 ' + (Game.isAdmin ? '∞' : Game.ammo) + ' ' + T('hudShots'); ammoDisplayEl.classList.toggle('empty', Game.ammo <= 0 && !Game.isAdmin); }
 [btnEasy, btnMedium].forEach(function(btn){ btn.addEventListener('click', function(){ [btnEasy, btnMedium].forEach(function(b){ b.classList.remove('selected'); }); btn.classList.add('selected'); Game.difficulty = btn.dataset.diff; }); });
 
 var MAP_SIZE = 520, MAP_PAD = 22; var explored = [];
@@ -597,6 +636,16 @@ function drawMap(){
     g.beginPath(); g.arc(scx,scy,cw*0.3,0,Math.PI*2); g.fillStyle = 'rgba(232,178,32,.9)'; g.fill();
   });
 
+  // 画主控台
+  if (Game.isEasterEgg) {
+    var consoleCell = notebooks[0];
+    if (consoleCell && !consoleCell.collected) {
+      var ccx = toPx(consoleCell.gx) + cw*0.5, ccy = toPy(consoleCell.gz) + ch*0.5;
+      g.beginPath(); g.arc(ccx, ccy, cw*0.5, 0, Math.PI*2); g.fillStyle = '#00ffcc'; g.fill();
+      g.strokeStyle = '#fff'; g.lineWidth = 2; g.stroke();
+    }
+  }
+
   var ppg = worldToGrid(player.pos.x, player.pos.z), ppgx = clamp(ppg.gx,0,MW-1), ppgz = clamp(ppg.gz,0,MH-1);
   var pcx = toPx(ppgx) + cw*0.5, pcy = toPy(ppgz) + ch*0.5, mapAngle = Math.atan2(-Math.cos(player.yaw), -Math.sin(player.yaw)), fanR = cw*3.6;
   g.beginPath(); g.moveTo(pcx,pcy); g.arc(pcx,pcy,fanR,mapAngle-0.55,mapAngle+0.55); g.closePath();
@@ -611,14 +660,24 @@ function drawMap(){
  * ============================================================ */
 var keys = Object.create(null); var pointerLocked = false;
 function requestLock(){ if(!canvas.requestPointerLock) return; try { var p = canvas.requestPointerLock(); if(p && p.catch) p.catch(function(){}); } catch(e){} }
-document.addEventListener('pointerlockchange', function(){ pointerLocked = (document.pointerLockElement === canvas); if(pointerLocked){ if(Game.state === 'paused'){ Game.state = 'playing'; hideAllScreens(); } return; } if(Game.state === 'puzzle') return; if(Game.state === 'playing'){ Game.state = 'paused'; Game.mapOpen = false; mapOverlay.classList.remove('open'); showScreen('pause'); } });
+document.addEventListener('pointerlockchange', function(){ pointerLocked = (document.pointerLockElement === canvas); if(pointerLocked){ if(Game.state === 'paused'){ Game.state = 'playing'; hideAllScreens(); } return; } if(Game.state === 'puzzle' || Game.state === 'admin') return; if(Game.state === 'playing'){ Game.state = 'paused'; Game.mapOpen = false; mapOverlay.classList.remove('open'); showScreen('pause'); } });
 document.addEventListener('pointerlockerror', function(){ pointerLocked = false; });
 canvas.addEventListener('mousedown', function(e){ if(e.button !== 0) return; if(Game.state === 'playing' && !pointerLocked){ requestLock(); e.preventDefault(); return; } if(Game.state !== 'playing' || !pointerLocked) return; tryShoot(); });
 document.addEventListener('keydown', function(e){
   if(Game.state === 'puzzle'){ if(e.key === 'Escape'){ cancelPuzzle(); e.preventDefault(); return; } if(Game.puzzleResolving){ e.preventDefault(); return; } if(e.key >= '0' && e.key <= '9'){ if(Game.puzzleInput.length < 5){ Game.puzzleInput += e.key; puzzleInputEl.textContent = Game.puzzleInput; } e.preventDefault(); } else if(e.key === 'Backspace'){ Game.puzzleInput = Game.puzzleInput.slice(0,-1); puzzleInputEl.textContent = Game.puzzleInput || '_'; e.preventDefault(); } else if(e.key === 'Enter'){ submitPuzzleAnswer(); e.preventDefault(); } return; }
+  if(Game.state === 'admin'){ 
+    if(e.key === 'Escape'){ closeAdminModal(); e.preventDefault(); return; } 
+    if(e.key === 'Enter'){ submitAdminPassword(); e.preventDefault(); return; }
+    if(e.key === 'Backspace'){ Game.adminInput = Game.adminInput.slice(0,-1); adminInputEl.textContent = Game.adminInput || '_'; e.preventDefault(); return; }
+    if(e.key.length === 1 && !e.ctrlKey && !e.altKey) { Game.adminInput += e.key.toLowerCase(); adminInputEl.textContent = Game.adminInput; e.preventDefault(); return; }
+    return;
+  }
   keys[e.code] = true;
   if(e.code === 'KeyM' && Game.state === 'playing' && !Game.mapOpen){ Game.mapOpen = true; mapOverlay.classList.add('open'); SoundFX.mapOpen(); }
-  if(e.code === 'KeyE' && Game.state === 'playing' && Game.nearbySafe){ openPuzzle(Game.nearbySafe); }
+  if(e.code === 'KeyE' && Game.state === 'playing' && Game.nearbySafe){ 
+    if (Game.isEasterEgg) { openAdminModal(); } 
+    else { openPuzzle(Game.nearbySafe); } 
+  }
   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].indexOf(e.code) >= 0) e.preventDefault();
 });
 document.addEventListener('keyup', function(e){ keys[e.code] = false; if(e.code === 'KeyM' && Game.mapOpen){ Game.mapOpen = false; mapOverlay.classList.remove('open'); } });
@@ -631,8 +690,11 @@ document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
  *  战斗与交互
  * ============================================================ */
 function tryShoot(){
-  if(Game.shootCooldown > 0) return; if(Game.ammo <= 0){ SoundFX.dryFire(); showToast(T('noAmmo'), 1.0); return; }
-  Game.ammo--; updateAmmoDisplay(); Game.shootCooldown = CONFIG.GUN.COOLDOWN; Game.recoil = 1.0; SoundFX.shoot(); if(muzzleLight) muzzleLight.intensity = 3.5;
+  if(Game.shootCooldown > 0) return; 
+  if(!Game.isAdmin && Game.ammo <= 0){ SoundFX.dryFire(); showToast(T('noAmmo'), 1.0); return; }
+  
+  if(!Game.isAdmin) Game.ammo--; 
+  updateAmmoDisplay(); Game.shootCooldown = CONFIG.GUN.COOLDOWN; Game.recoil = 1.0; SoundFX.shoot(); if(muzzleLight) muzzleLight.intensity = 3.5;
   safeEmit('playerShoot', { ammo: Game.ammo });
   var fwdX = -Math.sin(player.yaw), fwdZ = -Math.cos(player.yaw), hitM = null, hitDist = Infinity, hitP = null, hitPDist = Infinity;
   
@@ -656,7 +718,34 @@ function hitMonster(m){
   else showToast(T('stunToast'), 1.8);
   safeEmit('hitMonster', {});
 }
-function updateSafes(dt){ Game.nearbySafe = null; var bestDist = CONFIG.GUN.SAFE_INTERACT; for(var i=0;i<safes.length;i++){ var s = safes[i]; if(s.opened) continue; var dx = s.group.position.x - player.pos.x, dz = s.group.position.z - player.pos.z, d = Math.hypot(dx, dz); if(d < bestDist){ bestDist = d; Game.nearbySafe = s; } } interactPrompt.style.opacity = Game.nearbySafe ? '1' : '0'; }
+function updateSafes(dt){ 
+  Game.nearbySafe = null; 
+  if (Game.isEasterEgg) {
+    // 在彩蛋房间里，判断是否靠近主控台
+    if (notebooks.length > 0 && !notebooks[0].collected) {
+       var dx = notebooks[0].mesh.position.x - player.pos.x;
+       var dz = notebooks[0].mesh.position.z - player.pos.z;
+       if (Math.hypot(dx, dz) < 3.5) {
+         interactPrompt.textContent = "按 E 连接系统主控台";
+         interactPrompt.style.opacity = '1';
+         Game.nearbySafe = { isConsole: true }; // 占位
+         return;
+       }
+    }
+    interactPrompt.style.opacity = '0';
+    return; 
+  }
+
+  var bestDist = CONFIG.GUN.SAFE_INTERACT; 
+  for(var i=0;i<safes.length;i++){ 
+    var s = safes[i]; 
+    if(s.opened) continue; 
+    var dx = s.group.position.x - player.pos.x, dz = s.group.position.z - player.pos.z, d = Math.hypot(dx, dz); 
+    if(d < bestDist){ bestDist = d; Game.nearbySafe = s; } 
+  } 
+  interactPrompt.style.opacity = Game.nearbySafe ? '1' : '0'; 
+}
+
 function openPuzzle(safe){ if(!safe || safe.opened || Game.state !== 'playing') return; Game.currentSafe = safe; Game.puzzleInput = ''; Game.puzzleResolving = false; Game.puzzleQuestion = generateMathQuestion(); puzzleEqEl.textContent = Game.puzzleQuestion.text + ' = ?'; puzzleInputEl.textContent = '_'; puzzleFeedbackEl.textContent = ''; interactPrompt.style.opacity = '0'; puzzleModal.classList.add('open'); Game.state = 'puzzle'; if(document.pointerLockElement === canvas) document.exitPointerLock(); }
 function cancelPuzzle(){ puzzleModal.classList.remove('open'); Game.state = 'paused'; Game.currentSafe = null; Game.puzzleQuestion = null; showScreen('pause'); }
 function submitPuzzleAnswer(){
@@ -672,14 +761,57 @@ function submitPuzzleAnswer(){
   }
 }
 
+/* ★ Admin 逻辑 */
+function openAdminModal(){
+  Game.adminInput = '';
+  adminInputEl.textContent = '_';
+  adminFeedbackEl.textContent = '';
+  interactPrompt.style.opacity = '0';
+  adminModal.classList.add('open');
+  Game.state = 'admin';
+  if(document.pointerLockElement === canvas) document.exitPointerLock();
+}
+function closeAdminModal(){
+  adminModal.classList.remove('open');
+  Game.state = 'paused';
+  showScreen('pause');
+}
+function submitAdminPassword(){
+  if (Game.adminInput === 'admin') {
+    Game.isAdmin = true;
+    adminFeedbackEl.textContent = '✓ ACCESS GRANTED';
+    adminFeedbackEl.style.color = '#00ffcc';
+    SoundFX.adminSuccess();
+    showToast("👑 管理员权限已开启", 3.0);
+    
+    // 改变视觉反馈
+    flashlight.color.setHex(0x00ffcc);
+    flashlight.intensity = 5.0;
+    Game.ammo = 999;
+    updateAmmoDisplay();
+    
+    setTimeout(() => {
+      adminModal.classList.remove('open');
+      requestLock();
+      if(pointerLocked) { Game.state = 'playing'; hideAllScreens(); }
+      else { Game.state = 'paused'; showScreen('pause'); }
+    }, 1000);
+  } else {
+    adminFeedbackEl.textContent = '✗ ACCESS DENIED';
+    adminFeedbackEl.style.color = '#ff3333';
+    SoundFX.wrongAnswer();
+    Game.adminInput = '';
+    adminInputEl.textContent = '_';
+  }
+}
+
 /* ============================================================
  *  更新循环
  * ============================================================ */
 function updatePlayer(dt){
   if(Game.isStunned){ Game.stunTimer -= dt; if(Game.stunTimer <= 0){ Game.isStunned = false; document.getElementById('stunOverlay').style.opacity = '0'; } return; }
   
-  // 彩蛋房间不耗电
-  if (!Game.isEasterEgg) {
+  if (!Game.isEasterEgg && !Game.isAdmin) {
     Game.battery -= dt * 0.6; if(Game.battery <= 0) Game.battery = 0;
   } else {
     Game.battery = 100;
@@ -689,7 +821,11 @@ function updatePlayer(dt){
   if(bar){ bar.style.width = Game.battery + '%'; if(Game.battery < 20) bar.style.background = '#ff3333'; else if(Game.battery < 50) bar.style.background = '#ffcc00'; else bar.style.background = '#00ffcc'; }
 
   var sprinting = (keys['ShiftLeft'] || keys['ShiftRight']) && !Game.mapOpen;
-  var speed = sprinting ? CONFIG.PLAYER_SPRINT : CONFIG.PLAYER_SPEED; if(Game.mapOpen) speed *= 0.42;
+  var speed = sprinting ? CONFIG.PLAYER_SPRINT : CONFIG.PLAYER_SPEED; 
+  
+  if (Game.isAdmin) speed *= 2.0; // 管理员双倍移速
+  if(Game.mapOpen) speed *= 0.42;
+  
   var forward=0, strafe=0;
   if(keys['KeyW']||keys['ArrowUp']) forward += 1; if(keys['KeyS']||keys['ArrowDown']) forward -= 1; if(keys['KeyA']||keys['ArrowLeft']) strafe -= 1; if(keys['KeyD']||keys['ArrowRight']) strafe += 1;
   var len = Math.hypot(forward, strafe); if(len > 0){ forward/=len; strafe/=len; }
@@ -724,7 +860,21 @@ function updateMonsters(dt){
     var distToPlayer = Math.hypot(mp.x - player.pos.x, mp.z - player.pos.z); if(distToPlayer < CONFIG.MONSTER_CATCH_DIST && !Game.isStunned) onPlayerCaught();
   });
 }
-function updateNotebooks(dt){ for(var i=0;i<notebooks.length;i++){ var nb = notebooks[i]; if(nb.collected) continue; nb.mesh.rotation.y += dt * 1.6; nb.mesh.position.y = 1.25 + Math.sin(Game.time*2 + i)*0.16; if(Math.hypot(nb.mesh.position.x - player.pos.x, nb.mesh.position.z - player.pos.z) < CONFIG.NOTEBOOK_PICK_DIST) collectNotebook(nb); } }
+function updateNotebooks(dt){ 
+  for(var i=0;i<notebooks.length;i++){ 
+    var nb = notebooks[i]; if(nb.collected) continue; 
+    nb.mesh.rotation.y += dt * 1.6; 
+    if (!Game.isEasterEgg) nb.mesh.position.y = 1.25 + Math.sin(Game.time*2 + i)*0.16; 
+    
+    if(Math.hypot(nb.mesh.position.x - player.pos.x, nb.mesh.position.z - player.pos.z) < CONFIG.NOTEBOOK_PICK_DIST) {
+      if (Game.isEasterEgg) {
+        // 不收集，只是玩家碰不到即可（由 updateSafes 处理 E 键）
+      } else {
+        collectNotebook(nb);
+      }
+    } 
+  } 
+}
 function collectNotebook(nb){ nb.collected = true; scene.remove(nb.mesh); Game.notebooksFound++; nbCountEl.textContent = String(Game.notebooksFound); SoundFX.pickup(); showToast(T('collectToast') + ' (' + Game.notebooksFound + '/' + Game.notebooksTotal + ')', 1.6); safeEmit('collectNotebook', nb.index); if(Game.notebooksFound >= Game.notebooksTotal) onPlayerWin(); }
 function onPlayerCaught(){ Game.state = 'gameover'; SoundFX.caught(); if(document.pointerLockElement === canvas) document.exitPointerLock(); endTitle.textContent = T('loseTitle'); endTitle.className = 'lose'; endStats.innerHTML = T('endStats1') + Game.notebooksFound + '/' + Game.notebooksTotal + '<br>' + T('endStats2') + formatTime(Game.time); showScreen('end'); }
 function onPlayerWin(){ Game.state = 'win'; SoundFX.victory(); if(document.pointerLockElement === canvas) document.exitPointerLock(); endTitle.textContent = T('winTitle'); endTitle.className = 'win'; endStats.innerHTML = T('endStats1') + Game.notebooksFound + '/' + Game.notebooksTotal + '<br>' + T('endStats2') + formatTime(Game.time); showScreen('end'); }
@@ -734,7 +884,7 @@ function updateEnvironment(dt){
   if (Game.isEasterEgg) {
     ambientLight.intensity = 1.2;
     hemiLight.intensity = 1.0;
-    flashlight.intensity = 0;
+    if (!Game.isAdmin) flashlight.intensity = 0;
     scene.fog = null;
     scene.background = new THREE.Color(0x87CEEB); 
     return;
@@ -758,13 +908,12 @@ function updateEnvironment(dt){
 
 var clock = null;
 function startGame(){
-  Game.state = 'playing'; Game.time = 0; Game.notebooksFound = 0; Game.mapOpen = false; Game.ammo = 0; Game.battery = 100; Game.isStunned = false;
+  Game.state = 'playing'; Game.time = 0; Game.notebooksFound = 0; Game.mapOpen = false; Game.ammo = 0; Game.battery = 100; Game.isStunned = false; Game.isAdmin = false;
   
-  // ★ 防呆彩蛋检测：去掉所有空格，兼容 - 和 /
   var rawInput = roomInput.value.trim().replace(/\s+/g, ''); 
   Game.isEasterEgg = (rawInput === '2026/10/22/11:26' || rawInput === '2026-10-22-11:26');
   
-  puzzleModal.classList.remove('open'); mapOverlay.classList.remove('open'); toastEl.classList.remove('show'); document.getElementById('stunOverlay').style.opacity = '0';
+  puzzleModal.classList.remove('open'); mapOverlay.classList.remove('open'); toastEl.classList.remove('show'); document.getElementById('stunOverlay').style.opacity = '0'; adminModal.classList.remove('open');
   generateMaze(); buildMazeMeshes(); resetExplored(); spawnPlayer(); updateExplored(); spawnNotebooks(); spawnBatteries(); spawnSafes(); spawnMonsters();
   camera.position.set(player.pos.x, CONFIG.EYE_HEIGHT, player.pos.z); camera.rotation.set(0, player.yaw, 0);
   
