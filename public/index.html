@@ -367,18 +367,60 @@ function spawnPlayer(){
   player.yaw = chosenYaw; player.pitch = 0; player.bobPhase = 0; player.bobAmount = 0;
 }
 var gunGroup = null, muzzleLight = null;
+
+// ★ 修复：重构完整的霰弹枪模型，并加上专属补光
 function createShotgunModel(){
   var g = new THREE.Group();
   var metalMat = new THREE.MeshLambertMaterial({ color: 0x35353c });
   var darkMetal = new THREE.MeshLambertMaterial({ color: 0x1e1e22 });
   var woodMat = new THREE.MeshLambertMaterial({ color: 0x5a3418 });
+  var woodDark = new THREE.MeshLambertMaterial({ color: 0x3e2210 });
+
+  // 双管
   var barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.038,0.040,0.78,10), metalMat); barrel.rotation.x = Math.PI/2; barrel.position.set(0, 0.012, -0.48); g.add(barrel);
+  var barrel2 = new THREE.Mesh(new THREE.CylinderGeometry(0.038,0.040,0.78,10), metalMat); barrel2.rotation.x = Math.PI/2; barrel2.position.set(0, -0.045, -0.48); g.add(barrel2);
+  
+  // 枪管箍
+  var clampRing = new THREE.Mesh(new THREE.BoxGeometry(0.13,0.12,0.05), darkMetal); clampRing.position.set(0, -0.016, -0.72); g.add(clampRing);
+
+  // 枪机
   var receiver = new THREE.Mesh(new THREE.BoxGeometry(0.10,0.13,0.28), darkMetal); receiver.position.set(0, -0.016, -0.12); g.add(receiver);
+  
+  // 枪托
   var stock = new THREE.Mesh(new THREE.BoxGeometry(0.085,0.11,0.34), woodMat); stock.position.set(0, -0.045, 0.20); g.add(stock);
+  var butt = new THREE.Mesh(new THREE.BoxGeometry(0.095,0.16,0.06), woodDark); butt.position.set(0, -0.055, 0.38); g.add(butt);
+  
+  // 握把
+  var grip = new THREE.Mesh(new THREE.BoxGeometry(0.07,0.19,0.09), woodMat); grip.position.set(0, -0.135, 0.08); grip.rotation.x = -0.30; g.add(grip);
+  
+  // 护木（泵动）
+  var pump = new THREE.Mesh(new THREE.BoxGeometry(0.10,0.09,0.20), woodMat); pump.position.set(0, -0.055, -0.36); g.add(pump);
+  
+  // 准星
+  var sight = new THREE.Mesh(new THREE.BoxGeometry(0.012,0.022,0.012), new THREE.MeshBasicMaterial({ color: 0xe8e8d0 })); sight.position.set(0, 0.072, -0.85); g.add(sight);
+  
   return g;
 }
-function setupGun(){ gunGroup = createShotgunModel(); camera.add(gunGroup); muzzleLight = new THREE.PointLight(0xffdd88, 0, 12, 2); muzzleLight.position.set(0.28, -0.10, -0.9); camera.add(muzzleLight); updateGunTransform(0); }
-function updateGunTransform(dt){ if(!gunGroup) return; Game.recoil = Math.max(0, Game.recoil - dt*5.2); var eased = Game.recoil * Game.recoil; gunGroup.position.set(0.29, -0.235 - eased*0.055, -0.55 + eased*0.14); gunGroup.rotation.set(eased*0.32, 0, 0); if(muzzleLight && muzzleLight.intensity > 0) muzzleLight.intensity = Math.max(0, muzzleLight.intensity - dt*42); }
+
+function setupGun(){
+  gunGroup = createShotgunModel(); 
+  camera.add(gunGroup);
+  
+  // 枪口火焰光源
+  muzzleLight = new THREE.PointLight(0xffdd88, 0, 12, 2); muzzleLight.position.set(0.28, -0.10, -0.9); camera.add(muzzleLight);
+  
+  // ★ 枪械专属补光（保证在黑暗中也能看清枪的细节）
+  var gunFill = new THREE.PointLight(0xffeecc, 1.5, 2, 2);
+  gunFill.position.set(0.3, -0.1, -0.3);
+  camera.add(gunFill);
+  
+  updateGunTransform(0);
+}
+function updateGunTransform(dt){
+  if(!gunGroup) return; Game.recoil = Math.max(0, Game.recoil - dt*5.2); var eased = Game.recoil * Game.recoil;
+  gunGroup.position.set(0.29, -0.235 - eased*0.055, -0.55 + eased*0.14); gunGroup.rotation.set(eased*0.32, 0, 0);
+  if(muzzleLight && muzzleLight.intensity > 0) muzzleLight.intensity = Math.max(0, muzzleLight.intensity - dt*42);
+}
 
 var monsters = [];
 function createMonsterMesh(){
@@ -482,10 +524,8 @@ function drawMap(){
   for(var z=0;z<MH;z++) for(var x=0;x<MW;x++){ if(!explored[z][x] || grid[z][x]===1) continue; g.fillStyle = 'rgba(252,247,226,.62)'; g.fillRect(toPx(x), toPy(z), cw, ch); }
   for(var z2=0;z2<MH;z2++) for(var x2=0;x2<MW;x2++){ if(!explored[z2][x2] || grid[z2][x2]!==1) continue; g.fillStyle = 'rgba(74,58,34,.78)'; g.fillRect(toPx(x2), toPy(z2), cw+0.6, ch+0.6); }
   
-  // ★ 修复：地图上重新绘制怪物、队友、电池和保险箱
   monsters.forEach(function(m){
-    var mp = m.group.position;
-    var mg = worldToGrid(mp.x, mp.z);
+    var mp = m.group.position; var mg = worldToGrid(mp.x, mp.z);
     var mgx = clamp(mg.gx,0,MW-1), mgz = clamp(mg.gz,0,MH-1);
     if(!explored[mgz][mgx]) return; 
     var mcx = toPx(mgx) + cw*0.5, mcy = toPy(mgz) + ch*0.5;
@@ -519,7 +559,6 @@ function drawMap(){
     g.beginPath(); g.arc(scx,scy,cw*0.3,0,Math.PI*2); g.fillStyle = 'rgba(232,178,32,.9)'; g.fill();
   });
 
-  // 绘制玩家自己
   var ppg = worldToGrid(player.pos.x, player.pos.z), ppgx = clamp(ppg.gx,0,MW-1), ppgz = clamp(ppg.gz,0,MH-1);
   var pcx = toPx(ppgx) + cw*0.5, pcy = toPy(ppgz) + ch*0.5, mapAngle = Math.atan2(-Math.cos(player.yaw), -Math.sin(player.yaw)), fanR = cw*3.6;
   g.beginPath(); g.moveTo(pcx,pcy); g.arc(pcx,pcy,fanR,mapAngle-0.55,mapAngle+0.55); g.closePath();
