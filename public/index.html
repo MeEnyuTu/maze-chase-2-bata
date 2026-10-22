@@ -272,16 +272,14 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 var scene = new THREE.Scene(); scene.background = new THREE.Color(CONFIG.FOG_COLOR); scene.fog = new THREE.Fog(CONFIG.FOG_COLOR, CONFIG.FOG_NEAR, CONFIG.FOG_FAR);
 var camera = new THREE.PerspectiveCamera(76, window.innerWidth/window.innerHeight, 0.08, 200); camera.rotation.order = 'YXZ'; scene.add(camera);
 
-// ★ 修复：环境光大幅调暗，用聚光灯代替点光源
 var ambientLight = new THREE.AmbientLight(0x303530, 0.4); scene.add(ambientLight);
 var hemiLight = new THREE.HemisphereLight(0x404840, 0x101010, 0.3); scene.add(hemiLight);
 
-// ★ 修复：手电筒光束（SpotLight）
+// 手电筒
 var flashlight = new THREE.SpotLight(0xffe9b0, 3.0, 22, Math.PI/5, 0.4, 1.5);
-flashlight.position.set(0, 0, 0); // 相对相机的位置
-flashlight.target.position.set(0, 0, -1); // 照向相机正前方
-camera.add(flashlight);
-camera.add(flashlight.target);
+flashlight.position.set(0, 0, 0);
+flashlight.target.position.set(0, 0, -1);
+camera.add(flashlight); camera.add(flashlight.target);
 
 var fillLight = new THREE.PointLight(0x5080c0, 0.2, 32, 2); scene.add(fillLight);
 var wallTex = makeWallTexture(), floorTex = makeFloorTexture(), ceilTex = makeCeilTexture();
@@ -307,13 +305,8 @@ var roomDisplay = null;
 
 function updateNetStatusText(){
   if(!netStatusEl) return;
-  if(Game.online){
-    netStatusEl.innerHTML = '🟢 ' + T('hudOnline') + ': ' + Game.playerCount;
-    netStatusEl.classList.add('online');
-  } else {
-    netStatusEl.innerHTML = T('modeSingle');
-    netStatusEl.classList.remove('online');
-  }
+  if(Game.online){ netStatusEl.innerHTML = '🟢 ' + T('hudOnline') + ': ' + Game.playerCount; netStatusEl.classList.add('online'); }
+  else { netStatusEl.innerHTML = T('modeSingle'); netStatusEl.classList.remove('online'); }
 }
 function updatePrompt(){ var p = document.getElementById('prompt'); if(!p) return; p.innerHTML = '<span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> ' + T('promptMove') + ' · ' + T('promptLook') + ' · ' + T('promptShoot') + ' · <span class="key">M</span> ' + T('promptMap') + ' · <span class="key">Shift</span> ' + T('promptSprint'); }
 function updateRoomDisplay(){ if(!roomDisplay) return; if(roomDisplay.style.display === 'none') return; var txt = roomDisplay.textContent || ''; var parts = txt.split(': '); var code = parts.length > 1 ? parts[parts.length-1] : '----'; if(I18N.current === 'en') roomDisplay.textContent = '🏠 Room: ' + code; else roomDisplay.textContent = '🏠 房间: ' + code; }
@@ -374,43 +367,18 @@ function spawnPlayer(){
   player.yaw = chosenYaw; player.pitch = 0; player.bobPhase = 0; player.bobAmount = 0;
 }
 var gunGroup = null, muzzleLight = null;
-
-// ★ 修复：霰弹枪 UI（模型）优化，双管+木托+护木
 function createShotgunModel(){
   var g = new THREE.Group();
   var metalMat = new THREE.MeshLambertMaterial({ color: 0x35353c });
   var darkMetal = new THREE.MeshLambertMaterial({ color: 0x1e1e22 });
   var woodMat = new THREE.MeshLambertMaterial({ color: 0x5a3418 });
-  var woodDark = new THREE.MeshLambertMaterial({ color: 0x3e2210 });
-
-  // 枪管 1 & 2
   var barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.038,0.040,0.78,10), metalMat); barrel.rotation.x = Math.PI/2; barrel.position.set(0, 0.012, -0.48); g.add(barrel);
-  var barrel2 = new THREE.Mesh(new THREE.CylinderGeometry(0.038,0.040,0.78,10), metalMat); barrel2.rotation.x = Math.PI/2; barrel2.position.set(0, -0.045, -0.48); g.add(barrel2);
-  // 枪机
   var receiver = new THREE.Mesh(new THREE.BoxGeometry(0.10,0.13,0.28), darkMetal); receiver.position.set(0, -0.016, -0.12); g.add(receiver);
-  // 枪托
   var stock = new THREE.Mesh(new THREE.BoxGeometry(0.085,0.11,0.34), woodMat); stock.position.set(0, -0.045, 0.20); g.add(stock);
-  // 托底
-  var butt = new THREE.Mesh(new THREE.BoxGeometry(0.095,0.16,0.06), woodDark); butt.position.set(0, -0.055, 0.38); g.add(butt);
-  // 握把
-  var grip = new THREE.Mesh(new THREE.BoxGeometry(0.07,0.19,0.09), woodMat); grip.position.set(0, -0.135, 0.08); grip.rotation.x = -0.30; g.add(grip);
-  // 护木
-  var pump = new THREE.Mesh(new THREE.BoxGeometry(0.10,0.09,0.20), woodMat); pump.position.set(0, -0.055, -0.36); g.add(pump);
-  // 准星
-  var sight = new THREE.Mesh(new THREE.BoxGeometry(0.012,0.022,0.012), new THREE.MeshBasicMaterial({ color: 0xe8e8d0 })); sight.position.set(0, 0.072, -0.85); g.add(sight);
-  
   return g;
 }
-function setupGun(){
-  gunGroup = createShotgunModel(); camera.add(gunGroup);
-  muzzleLight = new THREE.PointLight(0xffdd88, 0, 12, 2); muzzleLight.position.set(0.28, -0.10, -0.9); camera.add(muzzleLight);
-  updateGunTransform(0);
-}
-function updateGunTransform(dt){
-  if(!gunGroup) return; Game.recoil = Math.max(0, Game.recoil - dt*5.2); var eased = Game.recoil * Game.recoil;
-  gunGroup.position.set(0.29, -0.235 - eased*0.055, -0.55 + eased*0.14); gunGroup.rotation.set(eased*0.32, 0, 0);
-  if(muzzleLight && muzzleLight.intensity > 0) muzzleLight.intensity = Math.max(0, muzzleLight.intensity - dt*42);
-}
+function setupGun(){ gunGroup = createShotgunModel(); camera.add(gunGroup); muzzleLight = new THREE.PointLight(0xffdd88, 0, 12, 2); muzzleLight.position.set(0.28, -0.10, -0.9); camera.add(muzzleLight); updateGunTransform(0); }
+function updateGunTransform(dt){ if(!gunGroup) return; Game.recoil = Math.max(0, Game.recoil - dt*5.2); var eased = Game.recoil * Game.recoil; gunGroup.position.set(0.29, -0.235 - eased*0.055, -0.55 + eased*0.14); gunGroup.rotation.set(eased*0.32, 0, 0); if(muzzleLight && muzzleLight.intensity > 0) muzzleLight.intensity = Math.max(0, muzzleLight.intensity - dt*42); }
 
 var monsters = [];
 function createMonsterMesh(){
@@ -429,7 +397,6 @@ function createMonsterMesh(){
   g.add(armL, armR);
   var head = new THREE.Mesh(new THREE.SphereGeometry(0.46,16,12), skinMat); head.position.y = 2.3; head.scale.set(1,1.1,1); g.add(head);
   
-  // ★ 修复：怪物 UI（光环）初始状态严谨化
   var stunRing = new THREE.Mesh(new THREE.TorusGeometry(0.48,0.055,6,18), new THREE.MeshBasicMaterial({ color: 0xffdd44, transparent:true, opacity:0.92 })); 
   stunRing.rotation.x = Math.PI/2; stunRing.position.y = 3.10; stunRing.visible = false; g.add(stunRing);
   var rageRing = new THREE.Mesh(new THREE.TorusGeometry(0.55,0.04,6,20), new THREE.MeshBasicMaterial({ color: 0xff3020, transparent:true, opacity:0.75 })); 
@@ -506,6 +473,7 @@ function resetExplored(){ explored = []; for(var z=0;z<MH;z++) explored.push(new
 function updateExplored(){ if(!explored.length) return; var pg = worldToGrid(player.pos.x, player.pos.z), pgx = clamp(pg.gx, 0, MW-1), pgz = clamp(pg.gz, 0, MH-1), R = CONFIG.MAP_VIEW_RADIUS; for(var dz=-R; dz<=R; dz++) for(var dx=-R; dx<=R; dx++){ var dist = Math.hypot(dx,dz); if(dist > R) continue; var x = pgx+dx, z = pgz+dz; if(x<0||z<0||x>=MW||z>=MH||explored[z][x]) continue; explored[z][x] = true; } }
 var paperTexture = null;
 function generatePaperTexture(){ var c = document.createElement('canvas'); c.width = c.height = MAP_SIZE; var g = c.getContext('2d'); var S = MAP_SIZE; var baseGrad = g.createLinearGradient(0,0,S,S); baseGrad.addColorStop(0,'#e3d9b8'); baseGrad.addColorStop(.48,'#d9cfab'); baseGrad.addColorStop(1,'#cdc19b'); g.fillStyle = baseGrad; g.fillRect(0,0,S,S); for(var i=0;i<12000;i++){ var a = (Math.random()*0.09).toFixed(3); g.fillStyle = Math.random()<0.5 ? 'rgba(112,94,56,'+a+')' : 'rgba(255,251,233,'+a+')'; g.fillRect(Math.random()*S, Math.random()*S, 1, 1); } var edgeGrad = g.createRadialGradient(S/2,S/2,S*.30,S/2,S/2,S*.80); edgeGrad.addColorStop(0,'rgba(0,0,0,0)'); edgeGrad.addColorStop(1,'rgba(72,54,26,.22)'); g.fillStyle = edgeGrad; g.fillRect(0,0,S,S); return c; }
+
 function drawMap(){
   var S = MAP_SIZE, g = mapCtx; if(!paperTexture) paperTexture = generatePaperTexture();
   g.clearRect(0,0,S,S); g.drawImage(paperTexture, 0, 0); var AREA = S - MAP_PAD*2, cw = AREA/MW, ch = AREA/MH;
@@ -513,6 +481,45 @@ function drawMap(){
   g.strokeStyle = 'rgba(84,64,36,.62)'; g.lineWidth = 2; g.strokeRect(MAP_PAD-1, MAP_PAD-1, AREA+2, AREA+2);
   for(var z=0;z<MH;z++) for(var x=0;x<MW;x++){ if(!explored[z][x] || grid[z][x]===1) continue; g.fillStyle = 'rgba(252,247,226,.62)'; g.fillRect(toPx(x), toPy(z), cw, ch); }
   for(var z2=0;z2<MH;z2++) for(var x2=0;x2<MW;x2++){ if(!explored[z2][x2] || grid[z2][x2]!==1) continue; g.fillStyle = 'rgba(74,58,34,.78)'; g.fillRect(toPx(x2), toPy(z2), cw+0.6, ch+0.6); }
+  
+  // ★ 修复：地图上重新绘制怪物、队友、电池和保险箱
+  monsters.forEach(function(m){
+    var mp = m.group.position;
+    var mg = worldToGrid(mp.x, mp.z);
+    var mgx = clamp(mg.gx,0,MW-1), mgz = clamp(mg.gz,0,MH-1);
+    if(!explored[mgz][mgx]) return; 
+    var mcx = toPx(mgx) + cw*0.5, mcy = toPy(mgz) + ch*0.5;
+    var dangerR = cw*2.2;
+    var grad = g.createRadialGradient(mcx,mcy,0,mcx,mcy,dangerR);
+    grad.addColorStop(0,'rgba(190,42,42,.28)'); grad.addColorStop(1,'rgba(190,42,42,0)');
+    g.fillStyle = grad; g.beginPath(); g.arc(mcx,mcy,dangerR,0,Math.PI*2); g.fill();
+    var fill = m.stunTimer > 0 ? 'rgba(200,160,20,.9)' : 'rgba(176,28,28,.94)';
+    g.beginPath(); g.arc(mcx,mcy,cw*0.42,0,Math.PI*2);
+    g.fillStyle = fill; g.fill();
+    g.strokeStyle = m.stunTimer > 0 ? 'rgba(80,50,0,.95)' : 'rgba(40,8,8,.95)'; g.lineWidth = 1.6; g.stroke();
+  });
+  
+  Object.keys(otherPlayers).forEach(function(id){
+    var p = otherPlayers[id]; var pp = p.mesh.position; var pg = worldToGrid(pp.x, pp.z);
+    var pgx = clamp(pg.gx,0,MW-1), pgz = clamp(pg.gz,0,MH-1);
+    var ocx = toPx(pgx) + cw*0.5, ocy = toPy(pgz) + ch*0.5;
+    g.beginPath(); g.arc(ocx,ocy,cw*0.36,0,Math.PI*2); g.fillStyle = 'rgba(59,130,246,.95)'; g.fill(); g.strokeStyle = 'rgba(20,40,120,.9)'; g.lineWidth = 1.5; g.stroke();
+  });
+
+  batteries.forEach(function(b){
+    if(!explored[b.gz] || !explored[b.gz][b.gx]) return;
+    var bcx = toPx(b.gx) + cw*0.5, bcy = toPy(b.gz) + ch*0.5;
+    g.beginPath(); g.arc(bcx,bcy,cw*0.2,0,Math.PI*2); g.fillStyle = 'rgba(0,255,204,.8)'; g.fill();
+  });
+
+  safes.forEach(function(s){
+    if(!explored[s.gz] || !explored[s.gz][s.gx]) return;
+    if(s.opened) return;
+    var scx = toPx(s.gx) + cw*0.5, scy = toPy(s.gz) + ch*0.5;
+    g.beginPath(); g.arc(scx,scy,cw*0.3,0,Math.PI*2); g.fillStyle = 'rgba(232,178,32,.9)'; g.fill();
+  });
+
+  // 绘制玩家自己
   var ppg = worldToGrid(player.pos.x, player.pos.z), ppgx = clamp(ppg.gx,0,MW-1), ppgz = clamp(ppg.gz,0,MH-1);
   var pcx = toPx(ppgx) + cw*0.5, pcy = toPy(ppgz) + ch*0.5, mapAngle = Math.atan2(-Math.cos(player.yaw), -Math.sin(player.yaw)), fanR = cw*3.6;
   g.beginPath(); g.moveTo(pcx,pcy); g.arc(pcx,pcy,fanR,mapAngle-0.55,mapAngle+0.55); g.closePath();
@@ -560,7 +567,7 @@ function tryShoot(){
   });
   for(var id in otherPlayers){
     var p = otherPlayers[id], px = p.mesh.position.x - player.pos.x, pz = p.mesh.position.z - player.pos.z, pdist = Math.hypot(px, pz);
-    if(pdist > 8 || pdist < 0.001) continue; // 最大距离缩短为 8
+    if(pdist > 8 || pdist < 0.001) continue;
     if((px*fwdX + pz*fwdZ) / pdist > CONFIG.GUN.CONE_DOT && pdist < hitPDist){ hitPDist = pdist; hitP = id; }
   }
   if(hitP && hitPDist < hitDist){ safeEmit('hitPlayer', hitP); showToast("🎯 击中队友！", 1.0); return; }
@@ -608,7 +615,6 @@ function updatePlayer(dt){
   var nx = player.pos.x + moveX; if(!collides(nx, player.pos.z, CONFIG.PLAYER_RADIUS)) player.pos.x = nx;
   var nz = player.pos.z + moveZ; if(!collides(player.pos.x, nz, CONFIG.PLAYER_RADIUS)) player.pos.z = nz;
 
-  // ★ 修复：开局摄像机抖动。只有移动时才产生 Bob 摇晃
   player.moving = len > 0.01;
   if(player.moving){
     player.bobPhase += dt * (sprinting ? 13.5 : 9.0);
@@ -640,15 +646,13 @@ function onPlayerCaught(){ Game.state = 'gameover'; SoundFX.caught(); if(documen
 function onPlayerWin(){ Game.state = 'win'; SoundFX.victory(); if(document.pointerLockElement === canvas) document.exitPointerLock(); endTitle.textContent = T('winTitle'); endTitle.className = 'win'; endStats.innerHTML = T('endStats1') + Game.notebooksFound + '/' + Game.notebooksTotal + '<br>' + T('endStats2') + formatTime(Game.time); showScreen('end'); }
 function updateHUD(dt){ vignetteEl.style.boxShadow = 'inset 0 0 ' + (120 + Math.floor(Game.dangerLevel*170)) + 'px rgba(180,0,0,' + (Game.dangerLevel*0.65).toFixed(3) + ')'; updateToast(dt); }
 
-// ★ 修复：更新环境光与手电筒强度
 function updateEnvironment(dt){
   var t = Game.time * 0.25; fillLight.position.set(Math.sin(t)*18, 3.4, Math.cos(t*0.8)*18);
-  var batteryFactor = 0.1 + (Game.battery / 100) * 0.9; // 没电时保留 10% 亮度，不至于完全瞎掉
-  
+  var batteryFactor = 0.1 + (Game.battery / 100) * 0.9;
   if(Game.state === 'menu'){
     ambientLight.intensity = 1.2; hemiLight.intensity = 0.8; flashlight.intensity = 0;
   } else if(Game.state === 'playing'){
-    ambientLight.intensity = 0.4 * batteryFactor; // 手电筒才是主光源
+    ambientLight.intensity = 0.4 * batteryFactor;
     hemiLight.intensity = 0.2 * batteryFactor;
     var flicker = 1.0 + Math.sin(Game.time*17.3)*0.04 + Math.sin(Game.time*7.1)*0.03;
     flashlight.intensity = 3.0 * batteryFactor * flicker;
