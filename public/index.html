@@ -126,7 +126,7 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
   </div>
   <p style="margin-top:18px;font-size:14px;color:#7fc98f;letter-spacing:3px" id="roomLabel">— ONLINE ROOM —</p>
   <div id="roomBox">
-    <input id="roomInput" maxlength="8" placeholder="ROOM CODE" value="">
+    <input id="roomInput" maxlength="20" placeholder="ROOM CODE" value="">
     <button id="roomRandom">🎲 Random</button>
   </div>
   <div id="roomHint">Players with the same room code enter the same maze</div>
@@ -209,7 +209,8 @@ var Game = {
   ammo: 0, shootCooldown: 0, recoil: 0, nearbySafe: null, currentSafe: null,
   puzzleInput: '', puzzleQuestion: null, puzzleResolving: false,
   difficulty: 'easy', online: false,
-  battery: 100, isStunned: false, stunTimer: 0, playerCount: 1
+  battery: 100, isStunned: false, stunTimer: 0, playerCount: 1,
+  isEasterEgg: false // 彩蛋标志
 };
 
 /* ============================================================
@@ -241,7 +242,21 @@ var SoundFX = {
  * ============================================================ */
 var grid = [];
 function generateMaze(){
-  grid = []; for(var z=0;z<MH;z++) grid.push(new Array(MW).fill(1)); var stack=[[1,1]]; grid[1][1]=0; var DIRS=[[0,-2],[0,2],[-2,0],[2,0]];
+  grid = [];
+  if (Game.isEasterEgg) {
+    // 彩蛋房间：只有四面边界墙，中间全空
+    for(var z=0;z<MH;z++) {
+      var row = [];
+      for(var x=0;x<MW;x++) {
+        if(x===0 || x===MW-1 || z===0 || z===MH-1) row.push(1);
+        else row.push(0);
+      }
+      grid.push(row);
+    }
+    return;
+  }
+
+  for(var z=0;z<MH;z++) grid.push(new Array(MW).fill(1)); var stack=[[1,1]]; grid[1][1]=0; var DIRS=[[0,-2],[0,2],[-2,0],[2,0]];
   while(stack.length>0){ var cur=stack[stack.length-1]; var cx=cur[0], cz=cur[1]; var dirs=shuffle(DIRS.slice()); var carved=false; for(var i=0;i<dirs.length;i++){ var dx=dirs[i][0], dz=dirs[i][1]; var nx=cx+dx, nz=cz+dz; if(nx>0&&nz>0&&nx<MW-1&&nz<MH-1&&grid[nz][nx]===1){ grid[nz][nx]=0; grid[cz+dz/2][cx+dx/2]=0; stack.push([nx,nz]); carved=true; break; } } if(!carved) stack.pop(); }
   var extra=Math.floor(MW*MH*0.06), guard=0; while(extra>0&&guard<5000){ guard++; var x=randInt(1,MW-2), z=randInt(1,MH-2); if(grid[z][x]!==1) continue; var horiz=grid[z][x-1]===0&&grid[z][x+1]===0; var vert =grid[z-1][x]===0&&grid[z+1][x]===0; if(horiz!==vert){ grid[z][x]=0; extra--; } }
   for(var xx=0;xx<MW;xx++){ grid[0][xx]=1; grid[MH-1][xx]=1; } for(var zz=0;zz<MH;zz++){ grid[zz][0]=1; grid[zz][MW-1]=1; }
@@ -433,6 +448,8 @@ function createMonsterMesh(){
 }
 function spawnMonsters(){
   monsters.forEach(function(m){ scene.remove(m.group); }); monsters.length = 0;
+  if (Game.isEasterEgg) return; // 彩蛋房间里没有怪物
+  
   var count = (Game.difficulty === 'medium') ? 2 : 1; var open = getOpenCells(); var spawnPoints = [];
   for(var i=0;i<count;i++){ var best = null, bestDist = -1; for(var j=0;j<open.length;j++){ var c = open[j], wp = gridToWorld(c.gx, c.gz); var minDist = wp.distanceTo(player.pos); for(var k=0;k<spawnPoints.length;k++){ var d = wp.distanceTo(spawnPoints[k]); if(d < minDist) minDist = d; } if(minDist > bestDist){ bestDist = minDist; best = c; } } if(best) spawnPoints.push(gridToWorld(best.gx, best.gz)); }
   spawnPoints.forEach(function(wp, i){ var group = createMonsterMesh(); group.position.set(wp.x, 0, wp.z); scene.add(group); monsters.push({ group: group, path: [], pathIndex: 0, repathTimer: 0, walkPhase: 0, facing: 0, catchCooldown: 0, alertPlayed: false, stunTimer: 0, rageMultiplier: 1.0, index: i }); });
@@ -442,6 +459,18 @@ var notebooks = []; var notebookTex = null;
 function createNotebookMesh(){ var group = new THREE.Group(); var body = new THREE.Mesh(new THREE.BoxGeometry(0.62,0.82,0.14), new THREE.MeshLambertMaterial({ map: notebookTex, emissive:0x554400, emissiveIntensity:0.7 })); group.add(body); var light = new THREE.PointLight(0xffcc55, 1.0, 8, 2); group.add(light); return group; }
 function spawnNotebooks(){
   notebooks.forEach(function(nb){ scene.remove(nb.mesh); }); notebooks.length = 0; if(!notebookTex) notebookTex = makeNotebookTexture();
+  
+  if (Game.isEasterEgg) {
+    // 彩蛋房间：在正中心放 1 个笔记本
+    var c = { gx: Math.floor(MW/2), gz: Math.floor(MH/2) };
+    var mesh = createNotebookMesh();
+    mesh.position.set(OFF_X + (c.gx+0.5)*CELL, 1.25, OFF_Z + (c.gz+0.5)*CELL);
+    scene.add(mesh);
+    notebooks.push({ mesh: mesh, gx:c.gx, gz:c.gz, collected:false, phase:0, index:0 });
+    Game.notebooksTotal = 1; Game.notebooksFound = 0;
+    return;
+  }
+
   var open = getOpenCells(); var candidates = [];
   for(var i=0;i<open.length;i++){ var c = open[i], wp = gridToWorld(c.gx,c.gz); if(wp.distanceTo(player.pos) > CELL*6) candidates.push({gx:c.gx,gz:c.gz,pos:wp}); }
   shuffle(candidates);
@@ -452,6 +481,8 @@ function spawnNotebooks(){
 var batteries = [];
 function spawnBatteries(){
   batteries.forEach(function(b){ scene.remove(b.mesh); }); batteries.length = 0;
+  if (Game.isEasterEgg) return; // 彩蛋房间不需要电池
+  
   var open = getOpenCells();
   for(var i=0; i<15; i++){
     var c = open[randInt(0, open.length-1)]; var wp = gridToWorld(c.gx, c.gz);
@@ -474,7 +505,10 @@ function updateBatteries(dt){
 var safes = [];
 function createSafeMesh(){ var g = new THREE.Group(); var body = new THREE.Mesh(new THREE.BoxGeometry(1.10,0.90,0.80), new THREE.MeshLambertMaterial({ color: 0x5a5a62 })); body.position.y = 0.55; g.add(body); var dial = new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,0.06,16), new THREE.MeshLambertMaterial({ color: 0xd8b858, emissive:0x553300 })); dial.rotation.x = Math.PI/2; dial.position.set(-0.22,0.55,0.50); g.add(dial); var lightMesh = new THREE.Mesh(new THREE.SphereGeometry(0.055,8,8), new THREE.MeshBasicMaterial({ color: 0xffdd66 })); lightMesh.position.set(0,1.10,0.42); g.add(lightMesh); g.userData = { lightMesh: lightMesh }; return g; }
 function spawnSafes(){
-  safes.forEach(function(s){ scene.remove(s.group); }); safes.length = 0; var noteSet = {}; notebooks.forEach(function(nb){ noteSet[nb.gx+','+nb.gz] = true; });
+  safes.forEach(function(s){ scene.remove(s.group); }); safes.length = 0; 
+  if (Game.isEasterEgg) return; // 彩蛋房间没有保险箱
+  
+  var noteSet = {}; notebooks.forEach(function(nb){ noteSet[nb.gx+','+nb.gz] = true; });
   var open = getOpenCells(); var candidates = [];
   for(var i=0;i<open.length;i++){ var c = open[i]; if(noteSet[c.gx+','+c.gz]) continue; var wp = gridToWorld(c.gx,c.gz); if(wp.distanceTo(player.pos) > CELL*4) candidates.push({gx:c.gx,gz:c.gz,wp:wp}); }
   shuffle(candidates);
@@ -523,14 +557,13 @@ function drawMap(){
     g.strokeStyle = m.stunTimer > 0 ? 'rgba(80,50,0,.95)' : 'rgba(40,8,8,.95)'; g.lineWidth = 1.6; g.stroke();
   });
 
-  // ★ 强化好友地图 UI：加白边、中心点、脉冲光环
+  // 强化好友地图 UI
   var time = Date.now() * 0.005;
   Object.keys(otherPlayers).forEach(function(id){
     var p = otherPlayers[id]; var pp = p.mesh.position; var pg = worldToGrid(pp.x, pp.z);
     var pgx = clamp(pg.gx,0,MW-1), pgz = clamp(pg.gz,0,MH-1);
     var ocx = toPx(pgx) + cw*0.5, ocy = toPy(pgz) + ch*0.5;
     
-    // 脉冲光环
     var pulseRadius = cw * 0.4 + Math.sin(time) * cw * 0.15;
     g.beginPath();
     g.arc(ocx, ocy, pulseRadius, 0, Math.PI * 2);
@@ -538,16 +571,14 @@ function drawMap(){
     g.lineWidth = 2;
     g.stroke();
     
-    // 大头针底座
     g.beginPath();
     g.arc(ocx, ocy, cw * 0.4, 0, Math.PI * 2);
     g.fillStyle = '#3b82f6';
     g.fill();
-    g.strokeStyle = '#ffffff'; // 白边增加对比度
+    g.strokeStyle = '#ffffff';
     g.lineWidth = 2;
     g.stroke();
     
-    // 中心点
     g.beginPath();
     g.arc(ocx, ocy, cw * 0.15, 0, Math.PI * 2);
     g.fillStyle = '#ffffff';
@@ -648,7 +679,13 @@ function submitPuzzleAnswer(){
 function updatePlayer(dt){
   if(Game.isStunned){ Game.stunTimer -= dt; if(Game.stunTimer <= 0){ Game.isStunned = false; document.getElementById('stunOverlay').style.opacity = '0'; } return; }
   
-  Game.battery -= dt * 0.6; if(Game.battery <= 0) Game.battery = 0;
+  // 彩蛋房间不耗电
+  if (!Game.isEasterEgg) {
+    Game.battery -= dt * 0.6; if(Game.battery <= 0) Game.battery = 0;
+  } else {
+    Game.battery = 100;
+  }
+  
   var bar = document.getElementById('batteryBar');
   if(bar){ bar.style.width = Game.battery + '%'; if(Game.battery < 20) bar.style.background = '#ff3333'; else if(Game.battery < 50) bar.style.background = '#ffcc00'; else bar.style.background = '#00ffcc'; }
 
@@ -677,6 +714,7 @@ function updatePlayer(dt){
   if(Game.shootCooldown > 0) Game.shootCooldown -= dt;
 }
 function updateMonsters(dt){
+  if (Game.isEasterEgg) return;
   monsters.forEach(function(m){
     var mp = m.group.position, ud = m.group.userData;
     if(m.stunTimer > 0){ m.stunTimer -= dt; if(ud.stunRing) ud.stunRing.visible = true; m.group.rotation.z = Math.sin(Game.time*12) * 0.12; m.group.position.y = 0; if(m.stunTimer <= 0){ m.stunTimer = 0; if(ud.stunRing) ud.stunRing.visible = false; m.group.rotation.z = 0; } return; }
@@ -694,6 +732,18 @@ function onPlayerWin(){ Game.state = 'win'; SoundFX.victory(); if(document.point
 function updateHUD(dt){ vignetteEl.style.boxShadow = 'inset 0 0 ' + (120 + Math.floor(Game.dangerLevel*170)) + 'px rgba(180,0,0,' + (Game.dangerLevel*0.65).toFixed(3) + ')'; updateToast(dt); }
 
 function updateEnvironment(dt){
+  if (Game.isEasterEgg) {
+    // 彩蛋房间：全亮，无手电筒，无雾气
+    ambientLight.intensity = 1.2;
+    hemiLight.intensity = 1.0;
+    flashlight.intensity = 0;
+    scene.fog = null;
+    scene.background = new THREE.Color(0x87CEEB); // 天蓝色背景
+    return;
+  }
+
+  scene.fog = new THREE.Fog(CONFIG.FOG_COLOR, CONFIG.FOG_NEAR, CONFIG.FOG_FAR);
+  scene.background = new THREE.Color(CONFIG.FOG_COLOR);
   var t = Game.time * 0.25; fillLight.position.set(Math.sin(t)*18, 3.4, Math.cos(t*0.8)*18);
   var batteryFactor = 0.25 + (Game.battery / 100) * 0.75; 
   if(Game.state === 'menu'){
@@ -711,12 +761,29 @@ function updateEnvironment(dt){
 var clock = null;
 function startGame(){
   Game.state = 'playing'; Game.time = 0; Game.notebooksFound = 0; Game.mapOpen = false; Game.ammo = 0; Game.battery = 100; Game.isStunned = false;
+  
+  // 彩蛋检测
+  var rawInput = roomInput.value.trim();
+  Game.isEasterEgg = (rawInput === '2026/10/22/11:26');
+  
   puzzleModal.classList.remove('open'); mapOverlay.classList.remove('open'); toastEl.classList.remove('show'); document.getElementById('stunOverlay').style.opacity = '0';
   generateMaze(); buildMazeMeshes(); resetExplored(); spawnPlayer(); updateExplored(); spawnNotebooks(); spawnBatteries(); spawnSafes(); spawnMonsters();
   camera.position.set(player.pos.x, CONFIG.EYE_HEIGHT, player.pos.z); camera.rotation.set(0, player.yaw, 0);
-  updateAmmoDisplay(); safeEmit('joinRoom', { code: roomInput.value.toUpperCase().trim() || 'PUBLIC', name: 'Player' });
+  
+  updateAmmoDisplay(); 
+  
+  // 发送给服务器的 code 处理
+  var emitCode = Game.isEasterEgg ? 'EGG' : (rawInput.toUpperCase().trim() || 'PUBLIC');
+  safeEmit('joinRoom', { code: emitCode, name: 'Player' });
+  
   SoundFX.startDrone(); nbCountEl.textContent = '0'; if(!clock) clock = new THREE.Clock(); clock.getDelta();
-  hideAllScreens(); showToast(Game.online ? T('startToast') : T('startToastSingle'), 2.4);
+  hideAllScreens(); 
+  
+  if (Game.isEasterEgg) {
+    showToast("✨ 欢迎来到开发者安全屋 ✨", 3.0);
+  } else {
+    showToast(Game.online ? T('startToast') : T('startToastSingle'), 2.4);
+  }
 }
 startBtn.addEventListener('click', function(){ SoundFX.init(); SoundFX.resume(); requestLock(); startGame(); });
 restartBtn.addEventListener('click', function(){ SoundFX.resume(); requestLock(); startGame(); });
