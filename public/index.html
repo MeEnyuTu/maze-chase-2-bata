@@ -323,11 +323,14 @@ function randomRoomCode(){ var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; var s
 if(roomRandom) roomRandom.addEventListener('click', function(){ if(roomInput) roomInput.value = randomRoomCode(); });
 if(roomInput) roomInput.value = randomRoomCode();
 
+// 好友模型：自带微光
 function addOtherPlayer(data){
   if(!data || !data.id || otherPlayers[data.id]) return;
   var group = new THREE.Group();
-  var body = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 1.4, 8), new THREE.MeshLambertMaterial({ color: 0x3b82f6 })); body.position.y = 0.7; group.add(body);
-  var head = new THREE.Mesh(new THREE.SphereGeometry(0.32, 8, 8), new THREE.MeshLambertMaterial({ color: 0xffcc99 })); head.position.y = 1.65; group.add(head);
+  var bodyMat = new THREE.MeshLambertMaterial({ color: 0x3b82f6, emissive: 0x1a3a80, emissiveIntensity: 0.8 });
+  var body = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 1.4, 8), bodyMat); body.position.y = 0.7; group.add(body);
+  var headMat = new THREE.MeshLambertMaterial({ color: 0xffcc99, emissive: 0x553311, emissiveIntensity: 0.6 });
+  var head = new THREE.Mesh(new THREE.SphereGeometry(0.32, 8, 8), headMat); head.position.y = 1.65; group.add(head);
   var marker = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 4), new THREE.MeshBasicMaterial({ color: 0xffe066 }));
   marker.position.y = 2.2; group.add(marker);
   group.position.set(data.x || 0, 0, data.z || 0); scene.add(group);
@@ -368,7 +371,6 @@ function spawnPlayer(){
 }
 var gunGroup = null, muzzleLight = null;
 
-// ★ 修复：重构完整的霰弹枪模型，并加上专属补光
 function createShotgunModel(){
   var g = new THREE.Group();
   var metalMat = new THREE.MeshLambertMaterial({ color: 0x35353c });
@@ -376,27 +378,14 @@ function createShotgunModel(){
   var woodMat = new THREE.MeshLambertMaterial({ color: 0x5a3418 });
   var woodDark = new THREE.MeshLambertMaterial({ color: 0x3e2210 });
 
-  // 双管
   var barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.038,0.040,0.78,10), metalMat); barrel.rotation.x = Math.PI/2; barrel.position.set(0, 0.012, -0.48); g.add(barrel);
   var barrel2 = new THREE.Mesh(new THREE.CylinderGeometry(0.038,0.040,0.78,10), metalMat); barrel2.rotation.x = Math.PI/2; barrel2.position.set(0, -0.045, -0.48); g.add(barrel2);
-  
-  // 枪管箍
   var clampRing = new THREE.Mesh(new THREE.BoxGeometry(0.13,0.12,0.05), darkMetal); clampRing.position.set(0, -0.016, -0.72); g.add(clampRing);
-
-  // 枪机
   var receiver = new THREE.Mesh(new THREE.BoxGeometry(0.10,0.13,0.28), darkMetal); receiver.position.set(0, -0.016, -0.12); g.add(receiver);
-  
-  // 枪托
   var stock = new THREE.Mesh(new THREE.BoxGeometry(0.085,0.11,0.34), woodMat); stock.position.set(0, -0.045, 0.20); g.add(stock);
   var butt = new THREE.Mesh(new THREE.BoxGeometry(0.095,0.16,0.06), woodDark); butt.position.set(0, -0.055, 0.38); g.add(butt);
-  
-  // 握把
   var grip = new THREE.Mesh(new THREE.BoxGeometry(0.07,0.19,0.09), woodMat); grip.position.set(0, -0.135, 0.08); grip.rotation.x = -0.30; g.add(grip);
-  
-  // 护木（泵动）
   var pump = new THREE.Mesh(new THREE.BoxGeometry(0.10,0.09,0.20), woodMat); pump.position.set(0, -0.055, -0.36); g.add(pump);
-  
-  // 准星
   var sight = new THREE.Mesh(new THREE.BoxGeometry(0.012,0.022,0.012), new THREE.MeshBasicMaterial({ color: 0xe8e8d0 })); sight.position.set(0, 0.072, -0.85); g.add(sight);
   
   return g;
@@ -405,15 +394,10 @@ function createShotgunModel(){
 function setupGun(){
   gunGroup = createShotgunModel(); 
   camera.add(gunGroup);
-  
-  // 枪口火焰光源
   muzzleLight = new THREE.PointLight(0xffdd88, 0, 12, 2); muzzleLight.position.set(0.28, -0.10, -0.9); camera.add(muzzleLight);
-  
-  // ★ 枪械专属补光（保证在黑暗中也能看清枪的细节）
   var gunFill = new THREE.PointLight(0xffeecc, 1.5, 2, 2);
   gunFill.position.set(0.3, -0.1, -0.3);
   camera.add(gunFill);
-  
   updateGunTransform(0);
 }
 function updateGunTransform(dt){
@@ -538,12 +522,36 @@ function drawMap(){
     g.fillStyle = fill; g.fill();
     g.strokeStyle = m.stunTimer > 0 ? 'rgba(80,50,0,.95)' : 'rgba(40,8,8,.95)'; g.lineWidth = 1.6; g.stroke();
   });
-  
+
+  // ★ 强化好友地图 UI：加白边、中心点、脉冲光环
+  var time = Date.now() * 0.005;
   Object.keys(otherPlayers).forEach(function(id){
     var p = otherPlayers[id]; var pp = p.mesh.position; var pg = worldToGrid(pp.x, pp.z);
     var pgx = clamp(pg.gx,0,MW-1), pgz = clamp(pg.gz,0,MH-1);
     var ocx = toPx(pgx) + cw*0.5, ocy = toPy(pgz) + ch*0.5;
-    g.beginPath(); g.arc(ocx,ocy,cw*0.36,0,Math.PI*2); g.fillStyle = 'rgba(59,130,246,.95)'; g.fill(); g.strokeStyle = 'rgba(20,40,120,.9)'; g.lineWidth = 1.5; g.stroke();
+    
+    // 脉冲光环
+    var pulseRadius = cw * 0.4 + Math.sin(time) * cw * 0.15;
+    g.beginPath();
+    g.arc(ocx, ocy, pulseRadius, 0, Math.PI * 2);
+    g.strokeStyle = 'rgba(59,130,246,0.6)';
+    g.lineWidth = 2;
+    g.stroke();
+    
+    // 大头针底座
+    g.beginPath();
+    g.arc(ocx, ocy, cw * 0.4, 0, Math.PI * 2);
+    g.fillStyle = '#3b82f6';
+    g.fill();
+    g.strokeStyle = '#ffffff'; // 白边增加对比度
+    g.lineWidth = 2;
+    g.stroke();
+    
+    // 中心点
+    g.beginPath();
+    g.arc(ocx, ocy, cw * 0.15, 0, Math.PI * 2);
+    g.fillStyle = '#ffffff';
+    g.fill();
   });
 
   batteries.forEach(function(b){
@@ -687,12 +695,12 @@ function updateHUD(dt){ vignetteEl.style.boxShadow = 'inset 0 0 ' + (120 + Math.
 
 function updateEnvironment(dt){
   var t = Game.time * 0.25; fillLight.position.set(Math.sin(t)*18, 3.4, Math.cos(t*0.8)*18);
-  var batteryFactor = 0.1 + (Game.battery / 100) * 0.9;
+  var batteryFactor = 0.25 + (Game.battery / 100) * 0.75; 
   if(Game.state === 'menu'){
     ambientLight.intensity = 1.2; hemiLight.intensity = 0.8; flashlight.intensity = 0;
   } else if(Game.state === 'playing'){
-    ambientLight.intensity = 0.4 * batteryFactor;
-    hemiLight.intensity = 0.2 * batteryFactor;
+    ambientLight.intensity = 0.6 * batteryFactor;
+    hemiLight.intensity = 0.3 * batteryFactor;
     var flicker = 1.0 + Math.sin(Game.time*17.3)*0.04 + Math.sin(Game.time*7.1)*0.03;
     flashlight.intensity = 3.0 * batteryFactor * flicker;
   } else {
