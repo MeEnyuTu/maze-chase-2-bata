@@ -927,11 +927,11 @@ function submitAdminPassword(){
 
   if (input === 'admin') {
     Game.isAdmin = true;
-    sessionStorage.setItem('mazeAdminMode', 'true'); 
+    // ★ 彻底移除持久化存储！现在的 admin 状态仅存活于当前这局游戏
     adminFeedbackEl.textContent = '✓ ACCESS GRANTED';
     adminFeedbackEl.style.color = '#00ffcc';
     SoundFX.adminSuccess();
-    showToast("👑 管理员权限已激活，去别的房间大闹一场吧！", 3.0);
+    showToast("👑 管理员权限已激活（本局有效），去大闹一场吧！", 3.0);
     
     adminBadge.style.display = 'inline';
     flashlight.color.setHex(0x00ffcc);
@@ -1058,21 +1058,10 @@ function startGame(){
   var rawInput = roomInput.value.trim().replace(/\s+/g, ''); 
   Game.isEasterEgg = (rawInput === '2026/10/22/11:26' || rawInput === '2026-10-22-11:26');
   
-  // ★ 核心修复：只有彩蛋房才允许使用 admin，普通房间强制清空管理员状态，防止“无敌导致游戏没效果”
-  if (Game.isEasterEgg) {
-    Game.isAdmin = sessionStorage.getItem('mazeAdminMode') === 'true';
-  } else {
-    Game.isAdmin = false;
-    sessionStorage.removeItem('mazeAdminMode');
-  }
-  
-  if (Game.isAdmin) {
-    adminBadge.style.display = 'inline';
-    flashlight.color.setHex(0x00ffcc);
-  } else {
-    adminBadge.style.display = 'none';
-    flashlight.color.setHex(0xffe9b0);
-  }
+  // ★ 终极修复：每次开局，强制将 admin 设为 false！只有进入彩蛋房才能变
+  Game.isAdmin = false;
+  adminBadge.style.display = 'none';
+  flashlight.color.setHex(0xffe9b0);
   
   puzzleModal.classList.remove('open'); mapOverlay.classList.remove('open'); toastEl.classList.remove('show'); document.getElementById('stunOverlay').style.opacity = '0'; adminModal.classList.remove('open');
   generateMaze(); buildMazeMeshes(); resetExplored(); spawnPlayer(); updateExplored(); spawnNotebooks(); spawnBatteries(); spawnSafes(); spawnMonsters();
@@ -1091,7 +1080,7 @@ function startGame(){
   serverLobby.style.display = 'none';
   
   if (Game.isEasterEgg) {
-    showToast(Game.isAdmin ? "👑 管理员已登录" : "✨ 欢迎来到开发者安全屋 ✨", 3.0);
+    showToast("✨ 欢迎来到开发者安全屋 ✨", 3.0);
   } else {
     showToast(Game.online ? T('startToast') : T('startToastSingle'), 2.4);
   }
@@ -1101,8 +1090,8 @@ function returnToLobby() {
   Game.state = 'menu';
   Game.isEasterEgg = false;
   
+  // ★ 统一在大厅清零
   Game.isAdmin = false;
-  sessionStorage.removeItem('mazeAdminMode');
   
   clearOtherPlayers();
   
