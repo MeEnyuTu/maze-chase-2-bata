@@ -18,6 +18,8 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
 #ammoDisplay{color:#ffb060;font-weight:bold}
 #ammoDisplay.empty{color:#884444}
 #ammoDisplay.admin{color:#ffd700;text-shadow:0 0 10px #ffd700}
+#exitRoomBtn { pointer-events: auto; background: transparent; color: #ff5555; border: 1px solid #ff5555; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 14px; letter-spacing: 2px; transition: all 0.2s; }
+#exitRoomBtn:hover { background: #ff5555; color: #000; }
 #warning{position:absolute;bottom:92px;left:50%;transform:translateX(-50%);font-size:22px;font-weight:bold;color:#ff4d4d;text-shadow:0 0 14px rgba(255,40,40,.9);opacity:0;transition:opacity .25s;letter-spacing:3px}
 #prompt{position:absolute;bottom:46px;left:50%;transform:translateX(-50%);font-size:15px;color:#b7d8c0;opacity:.75;letter-spacing:1px;text-align:center}
 #toast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.8);font-size:30px;font-weight:bold;color:#ffe066;text-shadow:0 0 20px rgba(255,220,80,.8);opacity:0;transition:opacity .3s,transform .3s;letter-spacing:3px;pointer-events:none;text-align:center;white-space:nowrap}
@@ -55,48 +57,16 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
 #adminFeedback{font-size:16px;letter-spacing:3px;height:24px;margin-bottom:16px;font-weight:bold}
 #adminHint{font-size:12px;color:#2a8a70;letter-spacing:2px}
 
-/* ★ 服务器大厅 UI */
-#serverLobby {
-  margin-top: 25px;
-  width: 480px;
-  background: rgba(0,0,0,0.6);
-  border: 2px solid #00ffcc;
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 0 20px rgba(0,255,204,0.2);
-  max-height: 200px;
-  overflow-y: auto;
-}
-#serverLobby h3 {
-  color: #00ffcc;
-  font-size: 16px;
-  letter-spacing: 4px;
-  margin-bottom: 12px;
-  border-bottom: 1px dashed #2a8a70;
-  padding-bottom: 8px;
-  text-align: left;
-}
-.lobby-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  margin-bottom: 8px;
-  background: rgba(0,255,204,0.05);
-  border: 1px solid #2a8a70;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
+#serverLobby { margin-top: 25px; width: 480px; background: rgba(0,0,0,0.6); border: 2px solid #00ffcc; border-radius: 8px; padding: 15px; box-shadow: 0 0 20px rgba(0,255,204,0.2); max-height: 200px; overflow-y: auto; }
+#serverLobby h3 { color: #00ffcc; font-size: 16px; letter-spacing: 4px; margin-bottom: 12px; border-bottom: 1px dashed #2a8a70; padding-bottom: 8px; text-align: left; }
+.lobby-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; margin-bottom: 8px; background: rgba(0,255,204,0.05); border: 1px solid #2a8a70; border-radius: 4px; transition: all 0.2s; }
 .lobby-item:hover { background: rgba(0,255,204,0.15); border-color: #00ffcc; }
 .lobby-code { font-size: 18px; font-weight: bold; color: #fff; letter-spacing: 2px; }
 .lobby-count { font-size: 14px; color: #8fe07a; margin-left: 15px; }
-.lobby-join-btn {
-  background: #00ffcc; color: #000; border: none; padding: 6px 15px;
-  font-weight: bold; font-family: inherit; cursor: pointer; border-radius: 3px; letter-spacing: 1px;
-}
+.lobby-join-btn { background: #00ffcc; color: #000; border: none; padding: 6px 15px; font-weight: bold; font-family: inherit; cursor: pointer; border-radius: 3px; letter-spacing: 1px; }
 .lobby-join-btn:hover { background: #fff; }
 
-.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:30;background:radial-gradient(circle at 50% 40%,rgba(20,50,35,.4),rgba(0,0,0,.93) 75%),#050a06;text-align:center;padding:20px}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:30;background:radial-gradient(circle at 50% 40%,rgba(20,50,35,.4),rgba(0,0,0,.93) 75%),#050a06;text-align:center;padding:20px; overflow-y: auto;}
 .screen.hidden{display:none}
 .screen h1{font-size:62px;letter-spacing:10px;color:#c9f0a8;text-shadow:0 0 12px rgba(120,255,140,.8),0 0 40px rgba(80,200,90,.5);margin-bottom:6px}
 .screen h2{font-size:22px;letter-spacing:6px;color:#7fc98f;margin-bottom:34px;font-weight:normal}
@@ -105,6 +75,9 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
 .btn{margin-top:20px;padding:15px 54px;font-size:20px;font-family:inherit;letter-spacing:5px;color:#0b1a10;background:#8fe07a;border:none;border-radius:5px;cursor:pointer;font-weight:bold;box-shadow:0 6px 0 #4c8a3e;pointer-events:auto;transition:transform .12s}
 .btn:hover{background:#a8f594;transform:translateY(-2px)}
 .btn:active{transform:translateY(4px);box-shadow:0 2px 0 #4c8a3e}
+.btn-danger{background:#ff5555;color:#fff;box-shadow:0 6px 0 #aa2222; font-size:18px; padding:14px 40px; margin-top:15px; border:2px solid #ffaaaa;}
+.btn-danger:hover{background:#ff7777;}
+.btn-danger:active{box-shadow:0 2px 0 #aa2222;}
 .diffBtn{padding:14px 40px;font-size:17px;font-family:inherit;letter-spacing:4px;color:#d6f5c0;background:rgba(40,80,50,.4);border:2px solid #4d8a5c;border-radius:5px;cursor:pointer;font-weight:bold;margin:8px;transition:all .15s}
 .diffBtn:hover{background:rgba(60,120,70,.6)}
 .diffBtn.selected{background:#8fe07a;color:#0b1a10;border-color:#8fe07a}
@@ -128,6 +101,8 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
     <span>📓 <span id="hudNotebooks">Notebooks</span> <span id="nbCount">0</span> / 7</span>
     <span id="ammoDisplay">🔫 0 <span id="hudShots">shots</span></span>
     <span id="adminBadge" style="display:none;color:#ffd700;font-weight:bold;text-shadow:0 0 10px #ffd700">👑 ADMIN</span>
+    <!-- ★ 修复：加回了退出按钮 -->
+    <button id="exitRoomBtn">退出 (Q)</button>
   </div>
   <div id="batteryContainer"><div id="batteryBar"></div></div>
   <div id="netStatus">⚪ Single Player</div>
@@ -161,7 +136,7 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
     <div id="adminSubtitle">DEVELOPER CONSOLE</div>
     <div id="adminInput">_</div>
     <div id="adminFeedback"></div>
-    <div id="adminHint">Enter password · ESC to cancel</div>
+    <div id="adminHint">Enter password · type "exit" to return to lobby · ESC to cancel</div>
   </div>
 </div>
 <div id="startScreen" class="screen">
@@ -188,7 +163,6 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
   </div>
   <div id="roomHint">Players with the same room code enter the same maze</div>
   
-  <!-- ★ 大厅列表 -->
   <div id="serverLobby" style="display:none;">
     <h3>🌐 SERVER LOBBY (点击加入)</h3>
     <div id="lobbyList"></div>
@@ -196,15 +170,21 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
 
   <button class="btn" id="startBtn" style="margin-top:20px;">START</button>
 </div>
+
+<!-- ★ 修复：加回了返回大厅按钮 -->
 <div id="pauseScreen" class="screen hidden">
   <h1 style="font-size:44px" id="pauseTitle">PAUSED</h1>
-  <h2 id="pauseHint">Click to continue</h2>
+  <h2 id="pauseHint">Click anywhere to continue</h2>
+  <button class="btn btn-danger" id="pauseLobbyBtn">返 回 大 厅</button>
 </div>
+
+<!-- ★ 修复：加回了返回大厅按钮 -->
 <div id="endScreen" class="screen hidden">
   <h1 id="endTitle" class="win">YOU ESCAPED</h1>
   <h2 id="endSubtitle">ESCAPED</h2>
   <div id="endStats"></div>
   <button class="btn" id="restartBtn">RESTART</button>
+  <button class="btn btn-danger" id="endLobbyBtn">返回大厅</button>
 </div>
 <div id="scanlines"></div>
 
@@ -360,6 +340,9 @@ var fillLight = new THREE.PointLight(0x5080c0, 0.2, 32, 2); scene.add(fillLight)
 var wallTex = makeWallTexture(), floorTex = makeFloorTexture(), ceilTex = makeCeilTexture();
 var mazeGroup = new THREE.Group(); scene.add(mazeGroup);
 
+// ★ 修复：恢复逃生门变量
+var exitDoorMesh = null;
+
 function buildMazeMeshes(){
   while(mazeGroup.children.length>0){ var ch=mazeGroup.children.pop(); if(ch.geometry) ch.geometry.dispose(); if(ch.material){ if(Array.isArray(ch.material)) ch.material.forEach(function(m){m.dispose();}); else ch.material.dispose(); } }
   var floorMat = new THREE.MeshLambertMaterial({ map: floorTex }); floorTex.repeat.set(MW, MH); var floor = new THREE.Mesh(new THREE.PlaneGeometry(WORLD_W, WORLD_H), floorMat); floor.rotation.x = -Math.PI/2; mazeGroup.add(floor);
@@ -368,6 +351,41 @@ function buildMazeMeshes(){
   for(var z=0;z<MH;z++) for(var x=0;x<MW;x++){ if(grid[z][x]!==1) continue; var m = new THREE.Mesh(wallGeo, wallMat); var p = gridToWorld(x,z); m.position.set(p.x, CONFIG.WALL_HEIGHT/2, p.z); mazeGroup.add(m); }
   var lampGeo = new THREE.BoxGeometry(2.2,0.12,0.5); var lampMat = new THREE.MeshBasicMaterial({ color:0xe8f0c0 });
   for(var i=0;i<14;i++){ var gx=randInt(1,MW-2), gz=randInt(1,MH-2); if(grid[gz][gx]===1) continue; var lamp = new THREE.Mesh(lampGeo, lampMat); var p2 = gridToWorld(gx,gz); lamp.position.set(p2.x, CONFIG.WALL_HEIGHT-0.12, p2.z); mazeGroup.add(lamp); }
+}
+
+// ★ 修复：恢复生成逃生门函数
+function spawnExitDoor() {
+  if(exitDoorMesh) { scene.remove(exitDoorMesh); exitDoorMesh = null; }
+  if (Game.isEasterEgg) return;
+
+  exitDoorMesh = new THREE.Group();
+  grid[1][2] = 0; 
+  const doorPos = gridToWorld(1, 2); 
+  
+  const frameMat = new THREE.MeshLambertMaterial({ color: 0x111111 });
+  const frame = new THREE.Mesh(new THREE.BoxGeometry(2.0, 3.4, 0.2), frameMat);
+  frame.position.y = 1.7;
+  exitDoorMesh.add(frame);
+
+  const doorMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: 0.85 });
+  const door = new THREE.Mesh(new THREE.BoxGeometry(1.8, 3.2, 0.1), doorMat);
+  door.position.set(0, 1.6, 0.05);
+  exitDoorMesh.add(door);
+
+  const signMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc });
+  const sign = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.3, 0.15), signMat);
+  sign.position.set(0, 3.55, 0.1);
+  exitDoorMesh.add(sign);
+
+  const signLight = new THREE.PointLight(0x00ff88, 5.0, 12);
+  signLight.position.set(0, 3.0, 1.0);
+  exitDoorMesh.add(signLight);
+
+  exitDoorMesh.position.copy(doorPos);
+  exitDoorMesh.rotation.y = 0; 
+
+  scene.add(exitDoorMesh);
+  player.yaw = Math.PI;
 }
 
 /* ============================================================
@@ -427,11 +445,8 @@ function setupSocketListeners(){
   socket.on('connect', function(){ setNetStatus(true); clearOtherPlayers(); });
   socket.on('disconnect', function(){ clearOtherPlayers(); });
   
-  // ★ 接收服务器大厅列表
   socket.on('roomListUpdate', function(list){
-    if (Game.state !== 'menu') return; // 只在主菜单显示
-    
-    // 如果是单机模式提示
+    if (Game.state !== 'menu') return; 
     if (!Game.online) return;
 
     serverLobby.style.display = 'block';
@@ -455,13 +470,12 @@ function setupSocketListeners(){
       lobbyList.appendChild(div);
     });
 
-    // 绑定一键加入按钮
     var btns = lobbyList.querySelectorAll('.lobby-join-btn');
     btns.forEach(function(btn) {
       btn.addEventListener('click', function() {
         var code = this.getAttribute('data-code');
-        roomInput.value = code; // 自动填入房间号
-        SoundFX.init(); SoundFX.resume(); requestLock(); startGame(); // 直接开始游戏
+        roomInput.value = code;
+        SoundFX.init(); SoundFX.resume(); requestLock(); startGame(); 
       });
     });
   });
@@ -740,6 +754,14 @@ function drawMap(){
     }
   }
 
+  // 在大厅画一个门（彩蛋房时 exitDoorMesh 为 null 自动跳过）
+  if (exitDoorMesh) {
+    var ep = exitDoorMesh.position; var eg = worldToGrid(ep.x, ep.z);
+    var ecx = toPx(eg.gx) + cw*0.5, ecy = toPy(eg.gz) + ch*0.5;
+    g.beginPath(); g.arc(ecx, ecy, cw*0.4, 0, Math.PI*2); g.fillStyle = '#00ff88'; g.fill();
+    g.strokeStyle = '#fff'; g.lineWidth = 2; g.stroke();
+  }
+
   var ppg = worldToGrid(player.pos.x, player.pos.z), ppgx = clamp(ppg.gx,0,MW-1), ppgz = clamp(ppg.gz,0,MH-1);
   var pcx = toPx(ppgx) + cw*0.5, pcy = toPy(ppgz) + ch*0.5, mapAngle = Math.atan2(-Math.cos(player.yaw), -Math.sin(player.yaw)), fanR = cw*3.6;
   g.beginPath(); g.moveTo(pcx,pcy); g.arc(pcx,pcy,fanR,mapAngle-0.55,mapAngle+0.55); g.closePath();
@@ -769,10 +791,17 @@ document.addEventListener('keydown', function(e){
     if(e.key.length === 1 && !e.ctrlKey && !e.altKey) { Game.adminInput += e.key.toLowerCase(); adminInputEl.textContent = Game.adminInput; e.preventDefault(); return; }
     return;
   }
+  
+  if(e.code === 'KeyQ' && Game.state === 'playing' && !Game.mapOpen && !Game.isEasterEgg) {
+    returnToLobby();
+    return;
+  }
+
   keys[e.code] = true;
   if(e.code === 'KeyM' && Game.state === 'playing' && !Game.mapOpen){ Game.mapOpen = true; mapOverlay.classList.add('open'); SoundFX.mapOpen(); }
   if(e.code === 'KeyE' && Game.state === 'playing' && Game.nearbySafe){ 
     if (Game.isEasterEgg) { openAdminModal(); } 
+    else if (Game.nearbySafe.isExitDoor) { returnToLobby(); }
     else { openPuzzle(Game.nearbySafe); } 
   }
   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].indexOf(e.code) >= 0) e.preventDefault();
@@ -815,6 +844,7 @@ function hitMonster(m){
   else showToast(T('stunToast'), 1.8);
   safeEmit('hitMonster', {});
 }
+
 function updateSafes(dt){ 
   Game.nearbySafe = null; 
   if (Game.isEasterEgg) {
@@ -832,6 +862,18 @@ function updateSafes(dt){
     return; 
   }
 
+  // ★ 修复：检查是否靠近逃生门
+  if (exitDoorMesh) {
+    var dx = exitDoorMesh.position.x - player.pos.x;
+    var dz = exitDoorMesh.position.z - player.pos.z;
+    if (Math.hypot(dx, dz) < 2.5) {
+      interactPrompt.textContent = "按 E 推开大门离开 (返回大厅)";
+      interactPrompt.style.opacity = '1';
+      Game.nearbySafe = { isExitDoor: true };
+      return;
+    }
+  }
+
   var bestDist = CONFIG.GUN.SAFE_INTERACT; 
   for(var i=0;i<safes.length;i++){ 
     var s = safes[i]; 
@@ -840,6 +882,9 @@ function updateSafes(dt){
     if(d < bestDist){ bestDist = d; Game.nearbySafe = s; } 
   } 
   interactPrompt.style.opacity = Game.nearbySafe ? '1' : '0'; 
+  if(Game.nearbySafe && !Game.nearbySafe.isConsole && !Game.nearbySafe.isExitDoor) {
+    interactPrompt.textContent = "按 E 打开保险箱";
+  }
 }
 
 function openPuzzle(safe){ if(!safe || safe.opened || Game.state !== 'playing') return; Game.currentSafe = safe; Game.puzzleInput = ''; Game.puzzleResolving = false; Game.puzzleQuestion = generateMathQuestion(); puzzleEqEl.textContent = Game.puzzleQuestion.text + ' = ?'; puzzleInputEl.textContent = '_'; puzzleFeedbackEl.textContent = ''; interactPrompt.style.opacity = '0'; puzzleModal.classList.add('open'); Game.state = 'puzzle'; if(document.pointerLockElement === canvas) document.exitPointerLock(); }
@@ -871,8 +916,25 @@ function closeAdminModal(){
   Game.state = 'paused';
   showScreen('pause');
 }
+
+// ★ 修复：恢复 admin 面板的 exit 退出功能
 function submitAdminPassword(){
-  if (Game.adminInput === 'admin') {
+  var input = (Game.adminInput || '').trim();
+
+  if (input === 'exit') {
+    adminFeedbackEl.textContent = '✓ EXITING...';
+    adminFeedbackEl.style.color = '#00ffcc';
+    SoundFX.adminSuccess();
+    Game.adminInput = '';
+    setTimeout(function(){
+      adminModal.classList.remove('open');
+      if (document.pointerLockElement === canvas) document.exitPointerLock();
+      returnToLobby();
+    }, 350);
+    return;
+  }
+
+  if (input === 'admin') {
     Game.isAdmin = true;
     localStorage.setItem('mazeAdminMode', 'true'); 
     adminFeedbackEl.textContent = '✓ ACCESS GRANTED';
@@ -1016,6 +1078,10 @@ function startGame(){
   
   puzzleModal.classList.remove('open'); mapOverlay.classList.remove('open'); toastEl.classList.remove('show'); document.getElementById('stunOverlay').style.opacity = '0'; adminModal.classList.remove('open');
   generateMaze(); buildMazeMeshes(); resetExplored(); spawnPlayer(); updateExplored(); spawnNotebooks(); spawnBatteries(); spawnSafes(); spawnMonsters();
+  
+  // ★ 修复：恢复调用生成逃生门
+  spawnExitDoor();
+
   camera.position.set(player.pos.x, CONFIG.EYE_HEIGHT, player.pos.z); camera.rotation.set(0, player.yaw, 0);
   
   updateAmmoDisplay(); 
@@ -1025,7 +1091,7 @@ function startGame(){
   
   SoundFX.startDrone(); nbCountEl.textContent = '0'; if(!clock) clock = new THREE.Clock(); clock.getDelta();
   hideAllScreens(); 
-  serverLobby.style.display = 'none'; // 开始游戏后隐藏大厅
+  serverLobby.style.display = 'none';
   
   if (Game.isEasterEgg) {
     showToast(Game.isAdmin ? "👑 管理员已登录" : "✨ 欢迎来到开发者安全屋 ✨", 3.0);
@@ -1033,9 +1099,76 @@ function startGame(){
     showToast(Game.online ? T('startToast') : T('startToastSingle'), 2.4);
   }
 }
+
+// ★ 修复：恢复完整的返回大厅逻辑，并清理所有状态
+function returnToLobby() {
+  Game.state = 'menu';
+  Game.isEasterEgg = false;
+  
+  clearOtherPlayers();
+  
+  if (socket) {
+    safeEmit('leaveRoom');
+    socket.disconnect();
+    socket.connect();
+  }
+
+  // 重新生成普通迷宫并重置玩家
+  generateMaze();
+  buildMazeMeshes();
+  resetExplored();
+  spawnPlayer();
+  updateExplored();
+  camera.position.set(player.pos.x, CONFIG.EYE_HEIGHT + 0.85, player.pos.z);
+  camera.rotation.set(-0.16, player.yaw, 0);
+
+  // 清理临时状态
+  Game.isStunned = false;
+  Game.stunTimer = 0;
+  Game.mapOpen = false;
+  Game.nearbySafe = null;
+  Game.currentSafe = null;
+  Game.puzzleQuestion = null;
+  Game.puzzleResolving = false;
+  Game.puzzleInput = '';
+  Game.shootCooldown = 0;
+  Game.recoil = 0;
+  Game.toastTimer = 0;
+  Game.ammo = 0;
+  Game.battery = 100;
+  updateAmmoDisplay();
+  var bar = document.getElementById('batteryBar');
+  if(bar){ bar.style.width = '100%'; bar.style.background = '#00ffcc'; }
+
+  hideAllScreens();
+  startScreen.classList.remove('hidden');
+  serverLobby.style.display = 'block';
+
+  document.getElementById('stunOverlay').style.opacity = '0';
+  adminModal.classList.remove('open');
+  puzzleModal.classList.remove('open');
+  mapOverlay.classList.remove('open');
+  flashlight.color.setHex(0xffe9b0);
+  adminBadge.style.display = 'none';
+  
+  // 清理门
+  if(exitDoorMesh) {
+    scene.remove(exitDoorMesh);
+    exitDoorMesh = null;
+  }
+}
+
 startBtn.addEventListener('click', function(){ SoundFX.init(); SoundFX.resume(); requestLock(); startGame(); });
 restartBtn.addEventListener('click', function(){ SoundFX.resume(); requestLock(); startGame(); });
-pauseScreen.addEventListener('click', function(){ SoundFX.resume(); requestLock(); Game.state = 'playing'; hideAllScreens(); });
+pauseScreen.addEventListener('click', function(e){ 
+  if (e.target.tagName === 'BUTTON') return;
+  SoundFX.resume(); requestLock(); Game.state = 'playing'; hideAllScreens(); 
+});
+
+// ★ 修复：绑定缺失的按钮
+document.getElementById('pauseLobbyBtn').addEventListener('click', function(e) { e.stopPropagation(); returnToLobby(); });
+document.getElementById('endLobbyBtn').addEventListener('click', function(e) { e.stopPropagation(); returnToLobby(); });
+document.getElementById('exitRoomBtn').addEventListener('click', function(e) { e.stopPropagation(); returnToLobby(); });
 
 function animate(){
   requestAnimationFrame(animate); if(!clock) clock = new THREE.Clock(); var dt = Math.min(clock.getDelta(), 0.05);
