@@ -101,7 +101,6 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
     <span>📓 <span id="hudNotebooks">Notebooks</span> <span id="nbCount">0</span> / 7</span>
     <span id="ammoDisplay">🔫 0 <span id="hudShots">shots</span></span>
     <span id="adminBadge" style="display:none;color:#ffd700;font-weight:bold;text-shadow:0 0 10px #ffd700">👑 ADMIN</span>
-    <!-- ★ 修复：加回了退出按钮 -->
     <button id="exitRoomBtn">退出 (Q)</button>
   </div>
   <div id="batteryContainer"><div id="batteryBar"></div></div>
@@ -171,14 +170,12 @@ canvas#gameCanvas{display:block;width:100%;height:100%}
   <button class="btn" id="startBtn" style="margin-top:20px;">START</button>
 </div>
 
-<!-- ★ 修复：加回了返回大厅按钮 -->
 <div id="pauseScreen" class="screen hidden">
   <h1 style="font-size:44px" id="pauseTitle">PAUSED</h1>
   <h2 id="pauseHint">Click anywhere to continue</h2>
   <button class="btn btn-danger" id="pauseLobbyBtn">返 回 大 厅</button>
 </div>
 
-<!-- ★ 修复：加回了返回大厅按钮 -->
 <div id="endScreen" class="screen hidden">
   <h1 id="endTitle" class="win">YOU ESCAPED</h1>
   <h2 id="endSubtitle">ESCAPED</h2>
@@ -340,7 +337,6 @@ var fillLight = new THREE.PointLight(0x5080c0, 0.2, 32, 2); scene.add(fillLight)
 var wallTex = makeWallTexture(), floorTex = makeFloorTexture(), ceilTex = makeCeilTexture();
 var mazeGroup = new THREE.Group(); scene.add(mazeGroup);
 
-// ★ 修复：恢复逃生门变量
 var exitDoorMesh = null;
 
 function buildMazeMeshes(){
@@ -353,7 +349,6 @@ function buildMazeMeshes(){
   for(var i=0;i<14;i++){ var gx=randInt(1,MW-2), gz=randInt(1,MH-2); if(grid[gz][gx]===1) continue; var lamp = new THREE.Mesh(lampGeo, lampMat); var p2 = gridToWorld(gx,gz); lamp.position.set(p2.x, CONFIG.WALL_HEIGHT-0.12, p2.z); mazeGroup.add(lamp); }
 }
 
-// ★ 修复：恢复生成逃生门函数
 function spawnExitDoor() {
   if(exitDoorMesh) { scene.remove(exitDoorMesh); exitDoorMesh = null; }
   if (Game.isEasterEgg) return;
@@ -754,7 +749,6 @@ function drawMap(){
     }
   }
 
-  // 在大厅画一个门（彩蛋房时 exitDoorMesh 为 null 自动跳过）
   if (exitDoorMesh) {
     var ep = exitDoorMesh.position; var eg = worldToGrid(ep.x, ep.z);
     var ecx = toPx(eg.gx) + cw*0.5, ecy = toPy(eg.gz) + ch*0.5;
@@ -862,7 +856,6 @@ function updateSafes(dt){
     return; 
   }
 
-  // ★ 修复：检查是否靠近逃生门
   if (exitDoorMesh) {
     var dx = exitDoorMesh.position.x - player.pos.x;
     var dz = exitDoorMesh.position.z - player.pos.z;
@@ -916,8 +909,6 @@ function closeAdminModal(){
   Game.state = 'paused';
   showScreen('pause');
 }
-
-// ★ 修复：恢复 admin 面板的 exit 退出功能
 function submitAdminPassword(){
   var input = (Game.adminInput || '').trim();
 
@@ -936,7 +927,8 @@ function submitAdminPassword(){
 
   if (input === 'admin') {
     Game.isAdmin = true;
-    localStorage.setItem('mazeAdminMode', 'true'); 
+    // ★ 修复：使用 sessionStorage，关闭标签页或新开页面即失效，防止“传染”
+    sessionStorage.setItem('mazeAdminMode', 'true'); 
     adminFeedbackEl.textContent = '✓ ACCESS GRANTED';
     adminFeedbackEl.style.color = '#00ffcc';
     SoundFX.adminSuccess();
@@ -1064,7 +1056,8 @@ var clock = null;
 function startGame(){
   Game.state = 'playing'; Game.time = 0; Game.notebooksFound = 0; Game.mapOpen = false; Game.ammo = 0; Game.battery = 100; Game.isStunned = false; 
   
-  Game.isAdmin = localStorage.getItem('mazeAdminMode') === 'true';
+  // ★ 修复：从 sessionStorage 读取，保证新页面不会自动获得权限
+  Game.isAdmin = sessionStorage.getItem('mazeAdminMode') === 'true';
   if (Game.isAdmin) {
     adminBadge.style.display = 'inline';
     flashlight.color.setHex(0x00ffcc);
@@ -1079,7 +1072,6 @@ function startGame(){
   puzzleModal.classList.remove('open'); mapOverlay.classList.remove('open'); toastEl.classList.remove('show'); document.getElementById('stunOverlay').style.opacity = '0'; adminModal.classList.remove('open');
   generateMaze(); buildMazeMeshes(); resetExplored(); spawnPlayer(); updateExplored(); spawnNotebooks(); spawnBatteries(); spawnSafes(); spawnMonsters();
   
-  // ★ 修复：恢复调用生成逃生门
   spawnExitDoor();
 
   camera.position.set(player.pos.x, CONFIG.EYE_HEIGHT, player.pos.z); camera.rotation.set(0, player.yaw, 0);
@@ -1100,10 +1092,13 @@ function startGame(){
   }
 }
 
-// ★ 修复：恢复完整的返回大厅逻辑，并清理所有状态
 function returnToLobby() {
   Game.state = 'menu';
   Game.isEasterEgg = false;
+  
+  // ★ 修复：回到大厅时强制取消 admin 状态，并清理 sessionStorage，防止传染
+  Game.isAdmin = false;
+  sessionStorage.removeItem('mazeAdminMode');
   
   clearOtherPlayers();
   
@@ -1113,7 +1108,6 @@ function returnToLobby() {
     socket.connect();
   }
 
-  // 重新生成普通迷宫并重置玩家
   generateMaze();
   buildMazeMeshes();
   resetExplored();
@@ -1122,7 +1116,6 @@ function returnToLobby() {
   camera.position.set(player.pos.x, CONFIG.EYE_HEIGHT + 0.85, player.pos.z);
   camera.rotation.set(-0.16, player.yaw, 0);
 
-  // 清理临时状态
   Game.isStunned = false;
   Game.stunTimer = 0;
   Game.mapOpen = false;
@@ -1151,7 +1144,6 @@ function returnToLobby() {
   flashlight.color.setHex(0xffe9b0);
   adminBadge.style.display = 'none';
   
-  // 清理门
   if(exitDoorMesh) {
     scene.remove(exitDoorMesh);
     exitDoorMesh = null;
@@ -1164,8 +1156,6 @@ pauseScreen.addEventListener('click', function(e){
   if (e.target.tagName === 'BUTTON') return;
   SoundFX.resume(); requestLock(); Game.state = 'playing'; hideAllScreens(); 
 });
-
-// ★ 修复：绑定缺失的按钮
 document.getElementById('pauseLobbyBtn').addEventListener('click', function(e) { e.stopPropagation(); returnToLobby(); });
 document.getElementById('endLobbyBtn').addEventListener('click', function(e) { e.stopPropagation(); returnToLobby(); });
 document.getElementById('exitRoomBtn').addEventListener('click', function(e) { e.stopPropagation(); returnToLobby(); });
