@@ -927,7 +927,6 @@ function submitAdminPassword(){
 
   if (input === 'admin') {
     Game.isAdmin = true;
-    // ★ 修复：使用 sessionStorage，关闭标签页或新开页面即失效，防止“传染”
     sessionStorage.setItem('mazeAdminMode', 'true'); 
     adminFeedbackEl.textContent = '✓ ACCESS GRANTED';
     adminFeedbackEl.style.color = '#00ffcc';
@@ -1056,8 +1055,17 @@ var clock = null;
 function startGame(){
   Game.state = 'playing'; Game.time = 0; Game.notebooksFound = 0; Game.mapOpen = false; Game.ammo = 0; Game.battery = 100; Game.isStunned = false; 
   
-  // ★ 修复：从 sessionStorage 读取，保证新页面不会自动获得权限
-  Game.isAdmin = sessionStorage.getItem('mazeAdminMode') === 'true';
+  var rawInput = roomInput.value.trim().replace(/\s+/g, ''); 
+  Game.isEasterEgg = (rawInput === '2026/10/22/11:26' || rawInput === '2026-10-22-11:26');
+  
+  // ★ 核心修复：只有彩蛋房才允许使用 admin，普通房间强制清空管理员状态，防止“无敌导致游戏没效果”
+  if (Game.isEasterEgg) {
+    Game.isAdmin = sessionStorage.getItem('mazeAdminMode') === 'true';
+  } else {
+    Game.isAdmin = false;
+    sessionStorage.removeItem('mazeAdminMode');
+  }
+  
   if (Game.isAdmin) {
     adminBadge.style.display = 'inline';
     flashlight.color.setHex(0x00ffcc);
@@ -1065,9 +1073,6 @@ function startGame(){
     adminBadge.style.display = 'none';
     flashlight.color.setHex(0xffe9b0);
   }
-  
-  var rawInput = roomInput.value.trim().replace(/\s+/g, ''); 
-  Game.isEasterEgg = (rawInput === '2026/10/22/11:26' || rawInput === '2026-10-22-11:26');
   
   puzzleModal.classList.remove('open'); mapOverlay.classList.remove('open'); toastEl.classList.remove('show'); document.getElementById('stunOverlay').style.opacity = '0'; adminModal.classList.remove('open');
   generateMaze(); buildMazeMeshes(); resetExplored(); spawnPlayer(); updateExplored(); spawnNotebooks(); spawnBatteries(); spawnSafes(); spawnMonsters();
@@ -1096,7 +1101,6 @@ function returnToLobby() {
   Game.state = 'menu';
   Game.isEasterEgg = false;
   
-  // ★ 修复：回到大厅时强制取消 admin 状态，并清理 sessionStorage，防止传染
   Game.isAdmin = false;
   sessionStorage.removeItem('mazeAdminMode');
   
